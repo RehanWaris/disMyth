@@ -166,6 +166,34 @@ async function voteGemini(content) {
   }
 }
 
+// Save each check to the Supabase "checks" table (server-side, service role).
+// Best-effort: a logging failure must never break the user's verdict.
+async function saveCheck(verdict, claim, region) {
+  const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(url.replace(/\/+$/, '') + '/rest/v1/checks', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        apikey: key,
+        authorization: 'Bearer ' + key,
+        prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        claim: (claim || verdict.claim || '').slice(0, 2000),
+        verdict: verdict.verdict || null,
+        confidence: typeof verdict.confidence === 'number' ? verdict.confidence : null,
+        models: (verdict.consensus && verdict.consensus.models) || null,
+        evidence: verdict.evidence || null,
+        region: region || null,
+      }),
+    });
+  } catch (e) {
+    /* ledger logging is best-effort; never surface to the user */
+  }
+}
+
 module.exports = async function handler(req, res) {
   const json = (code, obj) => {
     res.statusCode = code;
@@ -233,5 +261,6 @@ module.exports = async function handler(req, res) {
   add('Gemini', gem);
 
   verdict.consensus = { models };
+  await saveCheck(verdict, claim, (body.region || '').toString().slice(0, 120));
   return json(200, verdict);
 };

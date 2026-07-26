@@ -597,9 +597,9 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div style="font:11.5px/1.5 Inter;color:#7a828f;margin-bottom:14px">Everything DisMyth publishes is measured in the open — so anyone, including IFCN assessors, can audit our record.</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 <div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:oklch(0.72 0.15 145)">{{ medianTime }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">MEDIAN CLAIM → VERDICT</div></div>
-<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">{{ accuracy }}%</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">VERDICTS UPHELD ON REVIEW</div></div>
-<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">{{ checked30d }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">CLAIMS CHECKED · 30D</div></div>
-<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:oklch(0.78 0.15 80)">{{ correctionsCount }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">CORRECTIONS ISSUED</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">{{ ledgerTotal }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">CLAIMS CHECKED · TOTAL</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">{{ ledger30d }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">CLAIMS CHECKED · 30D</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:oklch(0.78 0.15 80)">{{ ledgerFalse }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">FLAGGED FALSE / MISLEADING</div></div>
 </div>
 <div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// CORRECTIONS_LOG</div>
 <div style="margin-top:11px;display:flex;flex-direction:column;gap:11px">
@@ -737,6 +737,15 @@ class Component extends DCLogic {
 
   obNext() { if (this.state.step >= 4) { this.setState({ screen: 'feed' }); } else { this.setState(s => ({ step: s.step + 1 })); } }
   obBack() { this.setState(s => ({ step: Math.max(0, s.step - 1) })); }
+
+  loadLedger() {
+    var SB = 'https://lrauoqykwgwhxxhpffzf.supabase.co';
+    var KEY = 'sb_publishable_FrH0thOASEhj0-5pczDPVQ_tYiNBGDS';
+    fetch(SB + '/rest/v1/rpc/ledger_stats', { method: 'POST', headers: { 'content-type': 'application/json', apikey: KEY, authorization: 'Bearer ' + KEY }, body: '{}' })
+      .then(function (r) { return r.json(); })
+      .then((d) => { var x = Array.isArray(d) ? d[0] : d; if (x) this.setState({ ledgerTotal: x.total_checks, ledger30d: x.checks_30d, ledgerFalse: x.false_or_misleading }); })
+      .catch(function () {});
+  }
 
   detectLocation() {
     if (this.state.geoStatus === 'locating') return;
@@ -884,7 +893,7 @@ class Component extends DCLogic {
       originHelp: 'The life story of this claim: where it first appeared (ORIGIN), how the wording was later changed to look convincing (MUTATION), and how far it then spread (SPREAD). Oldest is at the top, newest at the bottom.',
       biasHelp: 'Which political side the claim\u2019s wording leans toward — left, centre or right. It flags spin in how the claim is framed. This rates the claim itself, not DisMyth\u2019s verdict, which stays neutral.',
       isShare: S.screen === 'share', isLedger: S.screen === 'ledger',
-      goShare: () => this.setState({ screen: 'share', shareCaught: false }), goLedger: () => this.go('ledger'),
+      goShare: () => this.setState({ screen: 'share', shareCaught: false }), goLedger: () => { this.go('ledger'); this.loadLedger(); },
       shareCaught: S.shareCaught, shareTryPost: () => this.setState({ shareCaught: true }), shareReset: () => this.setState({ shareCaught: false }), seeShareFacts: () => this.openVerdict('vijay'),
       radar, corrections, accuracy: '—', medianTime: '~10s', checked30d: '0', correctionsCount: '0',
       isOnboard: S.screen === 'onboarding', isFeed: S.screen === 'feed', isMap: S.screen === 'map', isAlerts: S.screen === 'alerts', isAccount: S.screen === 'account', isSubmit: S.screen === 'submit', isChecking: S.screen === 'checking', isVerdict: S.screen === 'verdict', isCompose: S.screen === 'compose', isCompare: S.screen === 'compare', isTopicsMgr: S.screen === 'topics', isAlertRules: S.screen === 'alertrules', isMonitor: S.screen === 'monitor', isTeam: S.screen === 'team', isError: S.screen === 'error', errorMsg: S.errorMsg || 'Please check your connection and try again in a moment.',
@@ -924,6 +933,7 @@ class Component extends DCLogic {
       caseId: (this.hash((sel && sel.claim) || 'x') % 90000 + 10000),
       openSubmit: () => this.setState({ screen: 'submit' }), runCheck: () => this.runCheck(), openOnboarding: () => this.setState({ screen: 'onboarding', step: 0 }),
       detectLocation: () => this.detectLocation(),
+      ledgerTotal: (S.ledgerTotal != null ? S.ledgerTotal : '0'), ledger30d: (S.ledger30d != null ? S.ledger30d : '0'), ledgerFalse: (S.ledgerFalse != null ? S.ledgerFalse : '0'),
       shareVerdict: () => this.shareVerdict(), shareCopied: S.shareCopied,
       geoLabel: S.geoStatus === 'locating' ? '· locating…' : S.geoStatus === 'denied' ? '· location blocked' : S.geoStatus === 'error' ? '· tap to retry' : (S.geoStatus === 'done' || S.reg.region) ? '' : '· tap to detect',
       openCompose: () => this.setState({ screen: 'compose', published: false }), openVerdictBack: () => this.setState({ screen: 'verdict' }), publish: () => this.setState({ published: true }),
