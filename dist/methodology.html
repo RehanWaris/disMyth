@@ -16,6 +16,12 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DisMyth — Methodology & Standards">
 <meta name="twitter:description" content="How DisMyth reaches a verdict and holds itself accountable — written to align with the IFCN Code of Principles and the EFCSN Code of Standards.">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DisMyth">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -187,5 +193,5 @@ a:hover{color:#fff}
 </div></div>
 </div>
 </x-dc>
-</body>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script></body>
 </html>

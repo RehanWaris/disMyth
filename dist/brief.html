@@ -17,6 +17,12 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DisMyth — Backend Build Brief">
 <meta name="twitter:description" content="Engineering handoff: the backend specification that turns the DisMyth prototype into a live product.">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DisMyth">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -125,5 +131,5 @@ p.dmb,li.dmb{font-family:Inter,sans-serif;font-size:11.5px;line-height:1.6;color
 <p class="dmb mut" style="margin-top:24px;padding-top:10px;border-top:1px solid #d7dce3">Deliver §4 (pipeline) and §5 (data model) to spec and the existing frontend becomes a live product with minimal rework. Questions on any section → build against the prototype; it is the source of truth for behaviour and shapes.</p>
 </doc-page>
 </x-dc>
-</body>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script></body>
 </html>

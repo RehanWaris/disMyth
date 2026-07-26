@@ -16,6 +16,12 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DisMyth — Check a claim">
 <meta name="twitter:description" content="Open the DisMyth app: submit any claim and get a multi-AI verdict with weighted evidence, an origin & spread trace, media forensics and a bias meter.">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DisMyth">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -962,5 +968,5 @@ class Component extends DCLogic {
   }
 }
 </script>
-</body>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script></body>
 </html>

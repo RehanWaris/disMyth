@@ -39,6 +39,45 @@ FAVICON = ("data:image/svg+xml,"
            "%3Crect width='32' height='32' rx='7' fill='%230c0e12'/%3E"
            "%3Ccircle cx='16' cy='16' r='6' fill='%2334d399'/%3E%3C/svg%3E")
 
+# PWA: makes DisMyth installable to a phone home screen (icon + full-screen),
+# so it feels like a real app without an app-store download.
+PWA_HEAD = '''
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DisMyth">'''
+
+MANIFEST = '''{
+  "name": "DisMyth — Dismiss the lie",
+  "short_name": "DisMyth",
+  "description": "AI fact-checker. Check any claim against a consensus of AI models and trusted sources.",
+  "start_url": "/app.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0e12",
+  "theme_color": "#0c0e12",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
+'''
+
+# Minimal service worker: network passthrough (no caching, so deploys are never
+# stale) — just enough for the browser to treat DisMyth as an installable app.
+SW_JS = '''self.addEventListener('install', function(e){ self.skipWaiting(); });
+self.addEventListener('activate', function(e){ e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', function(e){ /* network passthrough */ });
+'''
+
+SW_REGISTER = ('''<script>if('serviceWorker' in navigator){'''
+               '''window.addEventListener('load',function(){'''
+               '''navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>''')
+
 META = {
     "index.html": dict(
         title="DisMyth — Dismiss the lie. Before it spreads.",
@@ -77,7 +116,7 @@ def meta_block(out_name):
 <meta property="og:url" content="{url}">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{m["title"]}">
-<meta name="twitter:description" content="{m["desc"]}">'''
+<meta name="twitter:description" content="{m["desc"]}">{PWA_HEAD}'''
 
 def rewrite_links(html):
     for old, new in RENAME.items():
@@ -178,10 +217,39 @@ document.addEventListener('submit', function (e) {
 </script>
 '''
 
+def _write_icon(path, size):
+    # DisMyth mark: dark brand square, green disc, dark check — "verified".
+    from PIL import Image, ImageDraw
+    img = Image.new("RGB", (size, size), (12, 14, 18))   # #0c0e12
+    d = ImageDraw.Draw(img)
+    r = size * 0.32; c = size / 2
+    d.ellipse([c - r, c - r, c + r, c + r], fill=(52, 211, 153))  # #34d399
+    # checkmark in the dark brand colour
+    ink = (12, 14, 18)
+    w = max(2, int(size * 0.065))
+    pts = [(c - 0.14 * size, c + 0.01 * size),
+           (c - 0.03 * size, c + 0.12 * size),
+           (c + 0.16 * size, c - 0.11 * size)]
+    d.line(pts, fill=ink, width=w, joint="curve")
+    for (x, y) in pts:                        # round the caps/joints
+        d.ellipse([x - w / 2, y - w / 2, x + w / 2, y + w / 2], fill=ink)
+    img.save(path, "PNG")
+
+def write_pwa_assets(dist):
+    _write_icon(os.path.join(dist, "icon-192.png"), 192)
+    _write_icon(os.path.join(dist, "icon-512.png"), 512)
+    _write_icon(os.path.join(dist, "apple-touch-icon.png"), 180)
+    open(os.path.join(dist, "manifest.json"), "w", encoding="utf-8").write(MANIFEST)
+    open(os.path.join(dist, "sw.js"), "w", encoding="utf-8").write(SW_JS)
+    print("  + PWA: manifest.json, sw.js, icon-192/512, apple-touch-icon")
+
 def build():
     if os.path.isdir(DIST):
         shutil.rmtree(DIST)
     os.makedirs(DIST)
+
+    # installable-app assets (manifest, service worker, icons)
+    write_pwa_assets(DIST)
 
     # verbatim runtime / print component
     for fn in ("support.js", "doc-page.js"):
@@ -201,6 +269,8 @@ def build():
         if out_name == "app.html":
             html = patch_runcheck(html)
             html = patch_consensus(html)
+        # register the service worker so the site is an installable PWA
+        html = html.replace("</body>", SW_REGISTER + "</body>", 1)
         open(os.path.join(DIST, out_name), "w", encoding="utf-8").write(html)
         print(f"  {src_name}  ->  dist/{out_name}")
 
