@@ -224,6 +224,34 @@ document.addEventListener('submit', function (e) {
 </script>
 '''
 
+def reshell_app(html):
+    """Turn the phone-mockup app into a full-screen, responsive web app.
+    Mobile: edge-to-edge, full height. Desktop: centered mobile-width column.
+    Also opens straight to the feed (no forced sign-up)."""
+    reps = [
+        # outer black phone body -> responsive app column
+        ('<div style="width:340px;height:720px;border-radius:46px;padding:11px;background:#000;box-shadow:0 40px 80px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);position:relative;flex:none">',
+         '<div style="width:100%;max-width:440px;height:100dvh;margin:0 auto;border-radius:0;padding:0;background:#0c0e12;position:relative;flex:none;overflow:hidden">'),
+        # drop the fake notch
+        ('<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:28px;background:#000;border-radius:0 0 17px 17px;z-index:60"></div>\n', ''),
+        # inner screen: remove the rounded-corner clip
+        ('<div style="width:100%;height:100%;border-radius:35px;overflow:hidden;position:relative;background:#0c0e12;color:#e8ecf2">',
+         '<div style="width:100%;height:100%;border-radius:0;overflow:hidden;position:relative;background:#0c0e12;color:#e8ecf2">'),
+        # drop the fake "9:41" status bar (real device shows its own)
+        ('<div style="position:absolute;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:15px 26px 6px;font:600 12px Inter;color:#e8ecf2">9:41<span style="letter-spacing:2px">● ● ●</span></div>\n\n', ''),
+        # body: fill the viewport instead of centering a fixed card
+        ('body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}',
+         'body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100dvh;display:flex;align-items:stretch;justify-content:center}'),
+        # open straight to the feed — free users never hit a sign-up wall
+        ("screen: 'onboarding', step: 0,", "screen: 'feed', step: 0,"),
+    ]
+    for old, new in reps:
+        assert old in html, "reshell anchor not found: " + old[:55]
+        html = html.replace(old, new, 1)
+    # remove the floating "Back to site" pill (marketing link now lives in Plans)
+    html = re.sub(r'<a href="[^"]*"[^>]*top:22px;left:22px[^>]*>.*?Back to site</a>', '', html, count=1)
+    return html
+
 def _write_icon(path, size):
     # DisMyth brand mark: pinwheel of 4 triangles on the dark brand square.
     from PIL import Image, ImageDraw
@@ -274,6 +302,7 @@ def build():
         if out_name == "app.html":
             html = patch_runcheck(html)
             html = patch_consensus(html)
+            html = reshell_app(html)
         # register the service worker so the site is an installable PWA
         html = html.replace("</body>", SW_REGISTER + "</body>", 1)
         open(os.path.join(DIST, out_name), "w", encoding="utf-8").write(html)

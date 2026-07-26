@@ -29,7 +29,7 @@
 <helmet data-dc-atomics>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
+body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100dvh;display:flex;align-items:stretch;justify-content:center}
 a{color:oklch(0.72 0.11 220);text-decoration:none}
 input,textarea{font-family:Inter,sans-serif}
 input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!important}
@@ -42,11 +42,8 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 </style>
 </helmet>
 
-<div style="width:340px;height:720px;border-radius:46px;padding:11px;background:#000;box-shadow:0 40px 80px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);position:relative;flex:none">
-<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:28px;background:#000;border-radius:0 0 17px 17px;z-index:60"></div>
-<div style="width:100%;height:100%;border-radius:35px;overflow:hidden;position:relative;background:#0c0e12;color:#e8ecf2">
-
-<div style="position:absolute;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:15px 26px 6px;font:600 12px Inter;color:#e8ecf2">9:41<span style="letter-spacing:2px">● ● ●</span></div>
+<div style="width:100%;max-width:440px;height:100dvh;margin:0 auto;border-radius:0;padding:0;background:#0c0e12;position:relative;flex:none;overflow:hidden">
+<div style="width:100%;height:100%;border-radius:0;overflow:hidden;position:relative;background:#0c0e12;color:#e8ecf2">
 
 <!-- ONBOARDING -->
 <sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ true }}">
@@ -679,7 +676,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 
 </div>
 </div>
-<a href="index.html" style="position:fixed;top:22px;left:22px;z-index:80;display:flex;align-items:center;gap:7px;font:600 12px Inter;color:#8a93a0;background:rgba(18,21,27,.9);border:1px solid #262c34;border-radius:10px;padding:8px 13px" style-hover="color:#fff;border-color:#3a424d"><span style="font-size:14px">←</span>Back to site</a>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{
   &quot;$preview&quot;: {&quot;width&quot;: 380, &quot;height&quot;: 760},
@@ -689,7 +686,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 }">
 class Component extends DCLogic {
   state = {
-    screen: 'onboarding', step: 0,
+    screen: 'feed', step: 0,
     reg: { name: '', contact: '', region: '' },
     topicsSel: { Health: true, Elections: true, Local: true },
     notif: { push: true, email: false, sms: true },
