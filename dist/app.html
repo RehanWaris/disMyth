@@ -77,7 +77,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div style="font:12px/1.5 Inter;color:#7a828f;margin-bottom:16px">We flash corrections to people in the region where a false claim is spreading. Where are you?</div>
 <div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">CITY / STATE / COUNTRY</div>
 <input value="{{ regRegion }}" onInput="{{ onRegion }}" placeholder="Chennai, Tamil Nadu, India" style="width:100%;box-sizing:border-box;margin-top:6px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:13px;color:#eef1f6;font-size:14px"/>
-<div style="margin-top:14px;display:flex;align-items:center;gap:9px;font:600 12px Inter;color:#04140b;background:oklch(0.72 0.15 145 / .16);border:1px solid oklch(0.72 0.15 145 / .4);color:oklch(0.82 0.12 150);border-radius:11px;padding:12px;cursor:pointer;justify-content:center">◎ Use my current location</div>
+<div onClick="{{ detectLocation }}" style="margin-top:14px;display:flex;align-items:center;gap:9px;font:600 12px Inter;color:#04140b;background:oklch(0.72 0.15 145 / .16);border:1px solid oklch(0.72 0.15 145 / .4);color:oklch(0.82 0.12 150);border-radius:11px;padding:12px;cursor:pointer;justify-content:center">◎ Use my current location <span style="font-weight:400;opacity:.75">{{ geoLabel }}</span></div>
 <div style="margin-top:16px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">ALERT RADIUS</div>
 <div style="margin-top:8px;display:flex;gap:8px">
 <div style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px">City</div>
@@ -134,7 +134,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 </div>
 <div style="padding:2px 20px 10px;display:flex;align-items:center;gap:8px">
 <div style="font:11px Inter;color:#7a828f">Monitoring</div>
-<div style="font:600 11px Inter;color:#e8ecf2;background:#1c2128;border:1px solid #262c34;padding:4px 10px;border-radius:20px">◎ {{ region }}</div>
+<div onClick="{{ detectLocation }}" style="font:600 11px Inter;color:#e8ecf2;background:#1c2128;border:1px solid #262c34;padding:4px 10px;border-radius:20px;cursor:pointer">◎ {{ region }} <span style="color:#5a626f;font-weight:400">{{ geoLabel }}</span></div>
 </div>
 <div style="padding:0 20px 8px;display:flex;gap:8px">
 <div onClick="{{ goLedger }}" style="flex:1;display:flex;align-items:center;gap:8px;background:#12151b;border:1px solid #1c2128;border-radius:11px;padding:9px 11px;cursor:pointer"><span style="font:12px;color:oklch(0.72 0.15 145)">◆</span><div style="min-width:0"><div style="font:600 11px Inter;color:#eef1f6">4 AIs per check</div><div style="font:9px JetBrains Mono;color:#5a626f">live web sources · ~10s</div></div></div>
@@ -162,37 +162,12 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <!-- MAP -->
 <sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}">
 <div class="dm-scr">
-<div style="padding:40px 20px 12px"><div style="font:700 17px Space Grotesk">Spread map</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Where claims are circulating now</div></div>
-<div class="dm-body" style="flex:1;overflow:auto;padding:4px 20px 96px">
-<div style="position:relative;height:250px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#12151b,#171b22);border:1px solid #1c2128;background-image:linear-gradient(#1c2128 1px,transparent 1px),linear-gradient(90deg,#1c2128 1px,transparent 1px);background-size:34px 34px">
-<div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 22px,rgba(255,255,255,.012) 22px,rgba(255,255,255,.012) 24px)"></div>
-<div style="position:absolute;left:26%;top:60%"><div style="width:16px;height:16px;border-radius:50%;background:oklch(0.60 0.21 25);box-shadow:0 0 0 5px oklch(0.60 0.21 25 / .22)"></div></div>
-<div style="position:absolute;left:52%;top:30%"><div style="width:13px;height:13px;border-radius:50%;background:oklch(0.78 0.15 80);box-shadow:0 0 0 5px oklch(0.78 0.15 80 / .22)"></div></div>
-<div style="position:absolute;left:70%;top:64%"><div style="width:11px;height:11px;border-radius:50%;background:oklch(0.60 0.21 25);box-shadow:0 0 0 4px oklch(0.60 0.21 25 / .22)"></div></div>
-<div style="position:absolute;left:40%;top:46%"><div style="width:12px;height:12px;border-radius:50%;background:oklch(0.62 0.03 260);box-shadow:0 0 0 4px oklch(0.62 0.03 260 / .22)"></div></div>
-<div style="position:absolute;left:18px;bottom:14px;font:10px JetBrains Mono;color:#7a828f;background:rgba(0,0,0,.35);padding:5px 9px;border-radius:8px">MAP PLACEHOLDER · drop live geo-tiles here</div>
-</div>
-<div style="margin-top:14px;display:flex;gap:14px;font:10px JetBrains Mono;color:#7a828f">
-<span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.60 0.21 25)"></span>False</span>
-<span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.78 0.15 80)"></span>Misleading</span>
-<span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.03 260)"></span>Unverified</span>
-</div>
-<div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// ACTIVE_HOTSPOTS</div>
-<div style="margin-top:11px;display:flex;flex-direction:column;gap:10px">
-<div style="background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:12px 13px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:600 13px Inter">Chennai, Tamil Nadu</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Old flood video re-surfacing</div></div><div style="font:700 12px JetBrains Mono;color:oklch(0.78 0.15 80)">12.4k</div></div>
-<div style="background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:12px 13px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:600 13px Inter">Delhi NCR</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">False "CM Vijay rally" claim</div></div><div style="font:700 12px JetBrains Mono;color:oklch(0.72 0.19 25)">4.2k</div></div>
-</div>
-<div style="margin-top:20px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// TREND_RADAR · GAINING VELOCITY</div>
-<div style="margin-top:6px;font:10.5px/1.4 Inter;color:#7a828f">Narratives accelerating now — prebunk before they peak.</div>
-<div style="margin-top:11px;display:flex;flex-direction:column;gap:11px">
-<sc-for list="{{ radar }}" as="rd" hint-placeholder-count="3">
-<div style="background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:12px 13px">
-<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font:600 12px/1.3 Inter;color:#eef1f6;flex:1">{{ rd.label }}</div><div style="font:700 10px JetBrains Mono;color:{{ rd.color }};flex:none">{{ rd.vel }}</div></div>
-<div style="margin-top:9px;height:5px;background:#1c2128;border-radius:3px;overflow:hidden"><div style="width:{{ rd.w }};height:100%;background:{{ rd.color }};border-radius:3px"></div></div>
-<div style="margin-top:7px;font:9.5px JetBrains Mono;color:#5a626f">◎ {{ rd.region }}</div>
-</div>
-</sc-for>
-</div>
+<div style="padding:40px 20px 12px"><div style="font:700 17px Space Grotesk">Spread map</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Where a claim is circulating</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:4px 30px 96px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+<div style="font:30px">🗺️</div>
+<div style="font:600 16px Space Grotesk;color:#eef1f6;margin-top:16px">Coming soon</div>
+<div style="font:13px/1.6 Inter;color:#8a93a0;margin-top:8px;max-width:280px">The live spread map will show where a false claim is circulating in real time. It arrives with proactive monitoring — it's on our roadmap, not live yet.</div>
+<div onClick="{{ openSubmit }}" style="margin-top:24px;cursor:pointer;font:700 13px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:11px;padding:12px 22px">Check a claim now →</div>
 </div>
 </div>
 </sc-if>
@@ -201,18 +176,11 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <sc-if value="{{ isAlerts }}" hint-placeholder-val="{{ false }}">
 <div class="dm-scr">
 <div style="padding:40px 20px 12px"><div style="font:700 17px Space Grotesk">Alerts</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">False info flagged near you</div></div>
-<div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px;display:flex;flex-direction:column;gap:11px">
-<div style="background:oklch(0.60 0.21 25 / .12);border:1px solid oklch(0.60 0.21 25 / .4);border-radius:15px;padding:14px">
-<div style="display:flex;align-items:center;gap:8px;font:700 10px JetBrains Mono;letter-spacing:1.5px;color:oklch(0.72 0.19 25)">⚠ FALSE CLAIM · YOUR AREA</div>
-<div style="margin-top:9px;font:500 13.5px/1.4 Space Grotesk;color:#eef1f6">A false "CM Vijay to visit Jantar Mantar" post is spreading in Delhi &amp; Tamil Nadu.</div>
-<div style="margin-top:9px;font:11px JetBrains Mono;color:#7a828f">2m ago · 4,231 shares blocked from your circles</div>
-</div>
-<div style="background:oklch(0.78 0.15 80 / .1);border:1px solid oklch(0.78 0.15 80 / .35);border-radius:15px;padding:14px">
-<div style="display:flex;align-items:center;gap:8px;font:700 10px JetBrains Mono;letter-spacing:1.5px;color:oklch(0.82 0.13 80)">! MISLEADING MEDIA</div>
-<div style="margin-top:9px;font:500 13.5px/1.4 Space Grotesk;color:#eef1f6">An old 2015 Chennai flood video is being shared as current.</div>
-<div style="margin-top:9px;font:11px JetBrains Mono;color:#7a828f">18m ago · Chennai, Tamil Nadu</div>
-</div>
-<div style="background:#12151b;border:1px solid #1c2128;border-radius:15px;padding:14px;text-align:center;color:#7a828f;font:11px Inter">Custom geo-alerts for saved topics are a <b style="color:#e8ecf2">DisMyth+</b> feature.</div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:4px 30px 96px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+<div style="font:30px">🔔</div>
+<div style="font:600 16px Space Grotesk;color:#eef1f6;margin-top:16px">Coming soon</div>
+<div style="font:13px/1.6 Inter;color:#8a93a0;margin-top:8px;max-width:290px">Get warned the moment a false claim starts spreading in your topics or area. Custom geo-alerts are a <span style="color:oklch(0.82 0.12 150)">DisMyth+ / Pro</span> feature, arriving with live monitoring.</div>
+<a href="index.html#waitlist" style="margin-top:24px;font:600 13px Inter;color:#e8ecf2;border:1px solid #262c34;border-radius:11px;padding:12px 22px">Notify me when it opens →</a>
 </div>
 </div>
 </sc-if>
@@ -238,7 +206,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div onClick="{{ goTopics }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Saved topics</div>
 <div onClick="{{ goAlertRules }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Alert rules</div>
 </div>
-<div style="margin-top:8px;text-align:center;font:700 12px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:10px;padding:10px;cursor:pointer">Upgrade to DisMyth+</div>
+<a href="index.html#waitlist" style="display:block;margin-top:8px;text-align:center;font:700 12px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:10px;padding:10px;cursor:pointer">Notify me when DisMyth+ opens</a>
 </div>
 <div style="background:#12151b;border:1px solid #1c2128;border-radius:16px;padding:16px">
 <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:700 14px Space Grotesk">Pro · Newsroom</div><div style="font:700 14px Inter">₹4,999<span style="font:400 11px;color:#7a828f">/mo</span></div></div>
@@ -248,7 +216,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div onClick="{{ goMonitor }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Dashboard</div>
 <div onClick="{{ goTeam }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Team &amp; API</div>
 </div>
-<div style="margin-top:8px;text-align:center;font:700 12px Inter;color:#e8ecf2;border:1px solid #262c34;border-radius:10px;padding:10px;cursor:pointer">Contact sales</div>
+<a href="index.html#waitlist" style="display:block;margin-top:8px;text-align:center;font:700 12px Inter;color:#e8ecf2;border:1px solid #262c34;border-radius:10px;padding:10px;cursor:pointer">Notify me when Pro opens</a>
 </div>
 <div style="text-align:center;font:10px JetBrains Mono;color:#5a626f;padding:6px 0 2px">DISMISS THE LIE · CREATED BY RIW (SPIRITED WORLD PRIVATE LIMITED)</div>
 </div>
@@ -534,7 +502,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 
 <div style="margin-top:18px;display:flex;gap:10px">
 <div onClick="{{ openCompose }}" style="flex:1;text-align:center;font:700 13px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:13px;cursor:pointer">⇄ Broadcast fact</div>
-<div style="width:48px;text-align:center;font:15px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:12px 0;cursor:pointer">↗</div>
+<div onClick="{{ shareVerdict }}" style="width:48px;text-align:center;font:15px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:12px 0;cursor:pointer">↗</div>
 </div>
 <div onClick="{{ openDispute }}" style="margin-top:9px;text-align:center;font:600 11.5px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:12px;padding:11px;cursor:pointer">⚑ Dispute · request human review</div>
 <div style="margin-top:9px;text-align:center;font:10px/1.4 JetBrains Mono;color:#5a626f">Broadcasting is a Pro feature · high-stakes claims need human sign-off</div>
@@ -801,6 +769,39 @@ class Component extends DCLogic {
   obNext() { if (this.state.step >= 4) { this.setState({ screen: 'feed' }); } else { this.setState(s => ({ step: s.step + 1 })); } }
   obBack() { this.setState(s => ({ step: Math.max(0, s.step - 1) })); }
 
+  detectLocation() {
+    if (this.state.geoStatus === 'locating') return;
+    if (!navigator.geolocation) { this.setState({ geoStatus: 'unsupported' }); return; }
+    this.setState({ geoStatus: 'locating' });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const la = pos.coords.latitude, lo = pos.coords.longitude;
+        fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + la + '&longitude=' + lo + '&localityLanguage=en')
+          .then((r) => r.json())
+          .then((d) => {
+            const place = [d.city || d.locality, d.principalSubdivision].filter(Boolean).join(', ');
+            this.setState((s) => ({ reg: { ...s.reg, region: place || d.countryName || 'your area' }, geoStatus: 'done' }));
+          })
+          .catch(() => this.setState({ geoStatus: 'error' }));
+      },
+      (err) => { this.setState({ geoStatus: (err && err.code === 1) ? 'denied' : 'error' }); },
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
+    );
+  }
+
+  shareVerdict() {
+    const S = this.state;
+    const list = this.claims();
+    const sel = this.decorate(S.selectedId === 'api' && S.apiClaim ? S.apiClaim : (list.find((c) => c.id === S.selectedId) || list[0]));
+    const text = 'DisMyth fact-check — Verdict: ' + sel.label + ' (' + sel.conf + '%). Claim: "' + sel.claim + '". Checked on dismyth.app';
+    const url = 'https://dismyth.app';
+    if (navigator.share) {
+      navigator.share({ title: 'DisMyth', text: text, url: url }).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(text + ' — ' + url).then(() => this.setState({ shareCopied: true })).catch(() => {});
+    }
+  }
+
   async runCheck() {
     const S = this.state;
     const claim = (S.submitText || '').trim();
@@ -961,6 +962,9 @@ class Component extends DCLogic {
       submitDispute: () => this.setState({ disputeSent: true }), disputeSent: S.disputeSent, notDisputeSent: !S.disputeSent,
       caseId: (this.hash((sel && sel.claim) || 'x') % 90000 + 10000),
       openSubmit: () => this.setState({ screen: 'submit' }), runCheck: () => this.runCheck(), openOnboarding: () => this.setState({ screen: 'onboarding', step: 0 }),
+      detectLocation: () => this.detectLocation(),
+      shareVerdict: () => this.shareVerdict(), shareCopied: S.shareCopied,
+      geoLabel: S.geoStatus === 'locating' ? '· locating…' : S.geoStatus === 'denied' ? '· location blocked' : S.geoStatus === 'error' ? '· tap to retry' : (S.geoStatus === 'done' || S.reg.region) ? '' : '· tap to detect',
       openCompose: () => this.setState({ screen: 'compose', published: false }), openVerdictBack: () => this.setState({ screen: 'verdict' }), publish: () => this.setState({ published: true }),
       tabFeed: tab('feed'), tabMap: tab('map'), tabAlerts: tab('alerts'), tabAccount: tab('account'),
     };
