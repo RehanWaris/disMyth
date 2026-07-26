@@ -241,7 +241,7 @@ def reshell_app(html):
         ('<div style="position:absolute;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:15px 26px 6px;font:600 12px Inter;color:#e8ecf2">9:41<span style="letter-spacing:2px">● ● ●</span></div>\n\n', ''),
         # body: fill the viewport instead of centering a fixed card
         ('body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}',
-         'body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100dvh;display:flex;align-items:stretch;justify-content:center}'),
+         'body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100dvh}'),
         # open straight to the feed — free users never hit a sign-up wall
         ("screen: 'onboarding', step: 0,", "screen: 'feed', step: 0,"),
     ]
