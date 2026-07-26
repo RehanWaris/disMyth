@@ -10,7 +10,7 @@ static site in ./dist:
   - adds 404.html, robots.txt, sitemap.xml
 The waitlist Formspree id stays a clearly-marked placeholder for the owner to fill.
 """
-import os, re, shutil
+import os, re, shutil, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC  = os.path.join(HERE, "src")
@@ -34,10 +34,17 @@ SRC_TO_OUT = {
 }
 
 # per-page <head> metadata
-FAVICON = ("data:image/svg+xml,"
-           "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
-           "%3Crect width='32' height='32' rx='7' fill='%230c0e12'/%3E"
-           "%3Ccircle cx='16' cy='16' r='6' fill='%2334d399'/%3E%3C/svg%3E")
+# DisMyth brand mark — pinwheel (matches the design project / app header logo).
+_FAVICON_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
+    '<rect width="100" height="100" rx="20" fill="#0a0c10"/>'
+    '<path d="M50 16 L84 50 L50 50 Z" fill="#7c5cff"/>'
+    '<path d="M50 16 L16 50 L50 50 Z" fill="#4d7cff"/>'
+    '<path d="M16 50 L50 84 L50 50 Z" fill="#33d6d0"/>'
+    '<path d="M84 50 L50 84 L50 50 Z" fill="#ff5c8a"/>'
+    '<line x1="50" y1="16" x2="50" y2="84" stroke="#0a0c10" stroke-width="4"/>'
+    '<line x1="16" y1="50" x2="84" y2="50" stroke="#0a0c10" stroke-width="4"/></svg>')
+FAVICON = "data:image/svg+xml," + urllib.parse.quote(_FAVICON_SVG)
 
 # PWA: makes DisMyth installable to a phone home screen (icon + full-screen),
 # so it feels like a real app without an app-store download.
@@ -218,21 +225,19 @@ document.addEventListener('submit', function (e) {
 '''
 
 def _write_icon(path, size):
-    # DisMyth mark: dark brand square, green disc, dark check — "verified".
+    # DisMyth brand mark: pinwheel of 4 triangles on the dark brand square.
     from PIL import Image, ImageDraw
-    img = Image.new("RGB", (size, size), (12, 14, 18))   # #0c0e12
+    img = Image.new("RGB", (size, size), (10, 12, 16))   # #0a0c10
     d = ImageDraw.Draw(img)
-    r = size * 0.32; c = size / 2
-    d.ellipse([c - r, c - r, c + r, c + r], fill=(52, 211, 153))  # #34d399
-    # checkmark in the dark brand colour
-    ink = (12, 14, 18)
-    w = max(2, int(size * 0.065))
-    pts = [(c - 0.14 * size, c + 0.01 * size),
-           (c - 0.03 * size, c + 0.12 * size),
-           (c + 0.16 * size, c - 0.11 * size)]
-    d.line(pts, fill=ink, width=w, joint="curve")
-    for (x, y) in pts:                        # round the caps/joints
-        d.ellipse([x - w / 2, y - w / 2, x + w / 2, y + w / 2], fill=ink)
+    def p(x, y): return (x / 100 * size, y / 100 * size)
+    top, left, bottom, right, ctr = p(50, 16), p(16, 50), p(50, 84), p(84, 50), p(50, 50)
+    d.polygon([top, right, ctr], fill=(124, 92, 255))     # #7c5cff purple
+    d.polygon([top, left, ctr], fill=(77, 124, 255))      # #4d7cff blue
+    d.polygon([left, bottom, ctr], fill=(51, 214, 208))   # #33d6d0 teal
+    d.polygon([right, bottom, ctr], fill=(255, 92, 138))  # #ff5c8a pink
+    lw = max(2, int(size * 0.03))
+    d.line([top, bottom], fill=(10, 12, 16), width=lw)    # dark divider
+    d.line([left, right], fill=(10, 12, 16), width=lw)
     img.save(path, "PNG")
 
 def write_pwa_assets(dist):
