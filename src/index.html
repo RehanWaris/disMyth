@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#0c0e12;color:#e8ecf2;font-family:Inter,system-ui,sans-serif}
+a{color:#c4ccd6;text-decoration:none}
+a:hover{color:#fff}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+.eyebrow{font:10px JetBrains Mono,monospace;letter-spacing:2px;color:oklch(0.72 0.15 145);text-transform:uppercase}
+.btn-p{display:inline-block;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:13px 22px}
+.btn-p:hover{color:#04140b;background:oklch(0.78 0.15 145)}
+.btn-s{display:inline-block;font:600 14px Inter;color:#e8ecf2;border:1px solid #262c34;border-radius:12px;padding:13px 22px}
+.btn-s:hover{color:#fff;border-color:#3a424d}
+.card{background:#12151b;border:1px solid #1c2128;border-radius:16px}
+.sec{padding:84px 0}
+.h2{font:700 32px/1.1 Space Grotesk;letter-spacing:-.5px;margin:14px 0 0;color:#f2f5f9;text-wrap:balance}
+.sub{font:15px/1.6 Inter;color:#8a93a0;margin-top:14px;max-width:560px}
+@media(max-width:760px){.h2{font-size:26px}.sec{padding:56px 0}}
+</style>
+</helmet>
+
+<div>
+<!-- NAV -->
+<div style="position:sticky;top:0;z-index:50;background:rgba(12,14,18,.82);backdrop-filter:blur(12px);border-bottom:1px solid #1c2128">
+<div class="wrap" style="display:flex;align-items:center;justify-content:space-between;height:64px">
+<div style="display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.72 0.15 145);box-shadow:0 0 8px oklch(0.72 0.15 145)"></span><span style="font:700 18px Space Grotesk;color:#f2f5f9">DisMyth</span></div>
+<div style="display:flex;align-items:center;gap:26px;font:500 13.5px Inter">
+<a href="#how">How it works</a>
+<a href="#why">Why DisMyth</a>
+<a href="#different">Compare</a>
+<a href="#features">Features</a>
+<a href="#pricing">Pricing</a>
+<a href="#waitlist">Waitlist</a>
+<a href="DisMyth Methodology.dc.html">Standards</a>
+<a href="DisMyth App.dc.html">Sign in</a>
+<a href="DisMyth App.dc.html" class="btn-p" style="padding:9px 16px;font-size:13px">Open the app</a>
+</div>
+</div>
+</div>
+
+<!-- HERO -->
+<div class="wrap" style="padding:76px 28px 40px;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center">
+<div>
+<div class="eyebrow">Fact-checker · myth-buster · rumour control</div>
+<h1 style="font:700 52px/1.03 Space Grotesk;letter-spacing:-1.5px;margin:16px 0 0;color:#f6f8fb;text-wrap:balance">Dismiss the lie<span style="color:oklch(0.72 0.15 145)">.</span> Before it spreads.</h1>
+<p style="font:17px/1.6 Inter;color:#9aa3b0;margin-top:20px;max-width:520px">DisMyth checks any claim against a <b style="color:#e8ecf2">consensus of AI models</b> and trusted sources, traces where it started, and flashes the verified truth back to the region where the rumour is spreading.</p>
+<div style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap"><a href="DisMyth App.dc.html" class="btn-p">Open the app →</a><a href="#how" class="btn-s">See how it works</a></div>
+<div style="margin-top:26px;font:11px JetBrains Mono;color:#5a626f">Free forever to check claims · No card required</div>
+</div>
+<div class="card" style="padding:22px;box-shadow:0 40px 80px -30px #000">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:600 12px Space Grotesk;color:#c4ccd6">Live verdict</div><div style="font:9px JetBrains Mono;color:oklch(0.72 0.15 145);background:oklch(0.72 0.15 145 / .14);padding:3px 8px;border-radius:6px">◇ MULTI-AI</div></div>
+<div style="margin-top:14px;border-radius:14px;padding:16px;background:oklch(0.60 0.21 25);box-shadow:0 16px 40px -18px oklch(0.60 0.21 25)">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:700 30px/.9 Space Grotesk;letter-spacing:-.6px;color:#fff">FALSE</div><div style="font:600 18px JetBrains Mono;color:#fff;opacity:.85">✕</div></div>
+<div style="margin-top:12px;display:flex;align-items:center;gap:9px"><div style="flex:1;height:6px;background:rgba(0,0,0,.22);border-radius:4px;overflow:hidden"><div style="width:94%;height:100%;background:#fff;border-radius:4px"></div></div><div style="font:700 11px JetBrains Mono;color:#fff">94%</div></div>
+</div>
+<div style="margin-top:13px;font:500 14px/1.4 Space Grotesk;color:#f2f5f9">"TN CM Vijay to visit Jantar Mantar rally in Delhi to meet the protestors."</div>
+<div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between"><div style="font:9px JetBrains Mono;color:#5a626f;letter-spacing:1.5px">AI CONSENSUS</div><div style="font:9px JetBrains Mono;color:#c4ccd6">4 of 4 AIs agree</div></div>
+<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:7px">
+<div style="display:flex;align-items:center;gap:7px;background:#0c0e12;border:1px solid #1c2128;border-radius:9px;padding:7px 9px"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.60 0.21 25)"></span><span style="font:600 10.5px Inter;color:#eef1f6">Claude</span><span style="font:8px JetBrains Mono;color:#5a626f;margin-left:auto">LIVE</span></div>
+<div style="display:flex;align-items:center;gap:7px;background:#0c0e12;border:1px solid #1c2128;border-radius:9px;padding:7px 9px"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.60 0.21 25)"></span><span style="font:600 10.5px Inter;color:#eef1f6">GPT-4o</span></div>
+<div style="display:flex;align-items:center;gap:7px;background:#0c0e12;border:1px solid #1c2128;border-radius:9px;padding:7px 9px"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.60 0.21 25)"></span><span style="font:600 10.5px Inter;color:#eef1f6">Grok</span></div>
+<div style="display:flex;align-items:center;gap:7px;background:#0c0e12;border:1px solid #1c2128;border-radius:9px;padding:7px 9px"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.60 0.21 25)"></span><span style="font:600 10.5px Inter;color:#eef1f6">Gemini</span></div>
+</div>
+</div>
+</div>
+
+<!-- TRUST STRIP -->
+<div style="border-top:1px solid #1c2128;border-bottom:1px solid #1c2128;background:#0a0c10">
+<div class="wrap" style="display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;padding:26px 28px">
+<div><div style="font:700 24px Space Grotesk;color:#f2f5f9">4 AIs</div><div style="font:11px JetBrains Mono;color:#5a626f;margin-top:3px">CROSS-CHECKED PER CLAIM</div></div>
+<div><div style="font:700 24px Space Grotesk;color:#f2f5f9">&lt; 10s</div><div style="font:11px JetBrains Mono;color:#5a626f;margin-top:3px">AVG VERDICT TIME</div></div>
+<div><div style="font:700 24px Space Grotesk;color:#f2f5f9">4 platforms</div><div style="font:11px JetBrains Mono;color:#5a626f;margin-top:3px">SIMULTANEOUS BROADCAST</div></div>
+<div><div style="font:700 24px Space Grotesk;color:#f2f5f9">Human</div><div style="font:11px JetBrains Mono;color:#5a626f;margin-top:3px">REVIEW ON CONTESTED</div></div>
+</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div id="how" class="sec"><div class="wrap">
+<div class="eyebrow">How it works</div>
+<h2 class="h2">One tap from rumour to receipt.</h2>
+<div style="margin-top:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+<div class="card" style="padding:20px"><div style="font:700 13px JetBrains Mono;color:oklch(0.72 0.15 145)">01</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Submit</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">Paste text, a link, or upload a photo/video you want checked.</div></div>
+<div class="card" style="padding:20px"><div style="font:700 13px JetBrains Mono;color:oklch(0.72 0.15 145)">02</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Cross-check</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">A consensus of AI models + trusted sources assess it in parallel.</div></div>
+<div class="card" style="padding:20px"><div style="font:700 13px JetBrains Mono;color:oklch(0.72 0.15 145)">03</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Verdict</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">Get a clear label, confidence, weighted evidence, origin trace &amp; bias.</div></div>
+<div class="card" style="padding:20px"><div style="font:700 13px JetBrains Mono;color:oklch(0.72 0.15 145)">04</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Broadcast</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">Push the correction to X, FB, IG &amp; Threads — and the affected region.</div></div>
+</div>
+</div></div>
+
+<!-- WHY DISMYTH -->
+<div id="why" style="background:#0a0c10;border-top:1px solid #1c2128;border-bottom:1px solid #1c2128"><div class="sec"><div class="wrap">
+<div class="eyebrow">Why not just ask a chatbot?</div>
+<h2 class="h2">A chatbot answers you. DisMyth protects everyone.</h2>
+<p class="sub">Asking an AI only helps the few who already doubt the claim. DisMyth is built for the ones who don't.</p>
+<div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div class="card" style="padding:22px;border-color:#262c34">
+<div style="font:600 14px Space Grotesk;color:#8a93a0">Ask ChatGPT / Claude directly</div>
+<div style="margin-top:14px;display:flex;flex-direction:column;gap:11px;font:13px/1.4 Inter;color:#8a93a0">
+<div>✕ Only when you think to ask</div>
+<div>✕ One model, may hallucinate</div>
+<div>✕ No live sources or origin trace</div>
+<div>✕ Answer dies in your private chat</div>
+<div>✕ No regional warning, no record</div>
+</div>
+</div>
+<div class="card" style="padding:22px;border-color:oklch(0.72 0.15 145 / .45)">
+<div style="font:600 14px Space Grotesk;color:oklch(0.82 0.12 150)">DisMyth</div>
+<div style="margin-top:14px;display:flex;flex-direction:column;gap:11px;font:13px/1.4 Inter;color:#c4ccd6">
+<div>✓ Always-on — catches lies proactively</div>
+<div>✓ Consensus of 4 AIs + human review</div>
+<div>✓ Weighted evidence &amp; origin/spread trace</div>
+<div>✓ Broadcasts the correction back out</div>
+<div>✓ Warns your region · shareable verdict card</div>
+</div>
+</div>
+</div>
+</div></div></div>
+
+<!-- WHY WE'RE DIFFERENT -->
+<div id="different" class="sec"><div class="wrap">
+<div class="eyebrow">Why we're different</div>
+<h2 class="h2">Honestly compared — not a made-up number.</h2>
+<p class="sub">Established human fact-checkers like Snopes and PolitiFact do rigorous work we respect. DisMyth adds the scale, speed and reach they were never built for — and does things a chatbot simply can't.</p>
+
+<div class="card" style="margin-top:36px;overflow:hidden;padding:0">
+<div style="display:grid;grid-template-columns:1.6fr 1fr 1.1fr 1.1fr 1.1fr;font:11px Inter">
+<div style="padding:16px 16px 14px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">CAPABILITY</div>
+<div style="padding:16px 8px 14px;text-align:center;background:oklch(0.72 0.15 145 / .08);border-bottom:2px solid oklch(0.72 0.15 145)"><div style="font:700 13px Space Grotesk;color:oklch(0.82 0.12 150)">DisMyth</div></div>
+<div style="padding:16px 8px 14px;text-align:center"><div style="font:600 12px Space Grotesk;color:#c4ccd6">Snopes /<br/>PolitiFact</div></div>
+<div style="padding:16px 8px 14px;text-align:center"><div style="font:600 12px Space Grotesk;color:#c4ccd6">Google<br/>Fact Check</div></div>
+<div style="padding:16px 8px 14px;text-align:center"><div style="font:600 12px Space Grotesk;color:#c4ccd6">ChatGPT /<br/>Claude</div></div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Proactive, always-on detection</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:oklch(0.78 0.15 80)">◐</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Multi-model AI consensus</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Deepfake &amp; media forensics</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:oklch(0.78 0.15 80)">◐</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:oklch(0.78 0.15 80)">◐</div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Origin &amp; mutation trace</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Geo-targeted regional alerts</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Broadcasts the correction back</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:oklch(0.78 0.15 80)">◐</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Public accuracy ledger</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:oklch(0.78 0.15 80)">◐</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+
+<div style="padding:13px 16px;border-top:1px solid #1c2128;font:12.5px/1.3 Inter;color:#c4ccd6">Human review on contested claims</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;background:oklch(0.72 0.15 145 / .06);color:oklch(0.82 0.12 150);font-weight:700">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:oklch(0.82 0.12 150)">✓</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+<div style="padding:13px 8px;border-top:1px solid #1c2128;text-align:center;color:#3a424d">✕</div>
+</div>
+</div>
+<div style="margin-top:16px;display:flex;gap:20px;flex-wrap:wrap;font:11px JetBrains Mono;color:#5a626f">
+<span style="display:flex;align-items:center;gap:6px"><span style="color:oklch(0.82 0.12 150)">✓</span>Full</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="color:oklch(0.78 0.15 80)">◐</span>Partial</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="color:#3a424d">✕</span>None</span>
+<span style="margin-left:auto;max-width:520px;text-align:right;text-wrap:pretty;color:#4a515c">Reflects publicly documented capabilities as of Jul 2026. Snopes &amp; PolitiFact remain the gold standard for human-verified fact-checking.</span>
+</div>
+</div></div>
+
+<!-- FEATURES -->
+<div id="features" class="sec"><div class="wrap">
+<div class="eyebrow">Features</div>
+<h2 class="h2">Built for credibility, not vibes.</h2>
+<div style="margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+<div class="card" style="padding:22px"><div style="font:22px">◇</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Multi-AI consensus</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">Claude, GPT-4o, Grok &amp; Gemini vote. You see the agreement, not one black-box answer.</div></div>
+<div class="card" style="padding:22px"><div style="font:22px">⚖</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Human review</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">When models disagree, the claim is marked Contested and escalated to a review board.</div></div>
+<div class="card" style="padding:22px"><div style="font:22px">◎</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Geo-targeted alerts</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">Get warned the moment a false claim spreads in your city, state or country.</div></div>
+<div class="card" style="padding:22px"><div style="font:22px">↗</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Weighted evidence</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">Every source is typed and credibility-scored — official, scientific, forensic or news.</div></div>
+<div class="card" style="padding:22px"><div style="font:22px">⟺</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">Bias &amp; neutrality</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">A per-claim leaning meter so you know how a story is being framed.</div></div>
+<div class="card" style="padding:22px"><div style="font:22px">⇄</div><div style="font:600 16px Space Grotesk;color:#f2f5f9;margin-top:12px">One-tap broadcast</div><div style="font:13px/1.5 Inter;color:#8a93a0;margin-top:7px">Publish the verified correction to all four networks at once (Pro).</div></div>
+</div>
+</div></div>
+
+<!-- PRICING -->
+<div id="pricing" style="background:#0a0c10;border-top:1px solid #1c2128"><div class="sec"><div class="wrap">
+<div class="eyebrow">Pricing</div>
+<h2 class="h2">Free to fight lies. Pay to broadcast truth.</h2>
+<p class="sub" style="margin:12px 0 0">Checking claims is <strong style="color:#f2f5f9">free today</strong> — no sign-up needed. Paid plans (DisMyth+ and Pro-Newsroom) open soon; join the notify list below.</p>
+<div style="margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start">
+<div class="card" style="padding:24px">
+<div style="font:700 16px Space Grotesk;color:#f2f5f9">Free</div><div style="font:700 30px Space Grotesk;color:#f6f8fb;margin-top:8px">₹0</div>
+<div style="margin-top:16px;display:flex;flex-direction:column;gap:9px;font:13px/1.35 Inter;color:#c4ccd6"><div>✓ Unlimited claim checks</div><div>✓ Multi-AI verdict cards</div><div>✓ Regional feed &amp; spread map</div><div>✓ Basic geo-alerts</div></div>
+<div style="margin-top:14px;font:11px JetBrains Mono;color:oklch(0.72 0.15 145)">● Available now</div>
+<a href="DisMyth App.dc.html" class="btn-p" style="margin-top:12px;display:block;text-align:center">Start free — no sign-up →</a>
+</div>
+<div class="card" style="padding:24px;border-color:oklch(0.72 0.15 145 / .5);position:relative">
+<div style="position:absolute;top:-10px;right:20px;font:700 9px JetBrains Mono;color:#04140b;background:oklch(0.80 0.13 80);padding:3px 9px;border-radius:6px">COMING SOON</div>
+<div style="font:700 16px Space Grotesk;color:oklch(0.82 0.12 150)">DisMyth+</div><div style="font:700 30px Space Grotesk;color:#f6f8fb;margin-top:8px">₹149<span style="font:400 13px Inter;color:#5a626f">/mo</span></div>
+<div style="margin-top:16px;display:flex;flex-direction:column;gap:9px;font:13px/1.35 Inter;color:#c4ccd6"><div>✓ Everything in Free</div><div>✓ Custom geo-alerts &amp; saved topics</div><div>✓ Priority checking · ad-free</div><div>✓ Watch &amp; history</div></div>
+<div style="margin-top:14px;font:11px JetBrains Mono;color:#5a626f">Coming soon</div>
+<a href="#waitlist" class="btn-s" style="margin-top:12px;display:block;text-align:center">Notify me →</a>
+</div>
+<div class="card" style="padding:24px">
+<div style="font:700 16px Space Grotesk;color:#f2f5f9">Pro · Newsroom</div><div style="font:700 30px Space Grotesk;color:#f6f8fb;margin-top:8px">₹4,999<span style="font:400 13px Inter;color:#5a626f">/mo</span></div>
+<div style="margin-top:16px;display:flex;flex-direction:column;gap:9px;font:13px/1.35 Inter;color:#c4ccd6"><div>✓ Auto-post to 4 networks</div><div>✓ Monitoring dashboard + API</div><div>✓ Team seats &amp; multi-account</div><div>✓ Human review board access</div></div>
+<div style="margin-top:14px;font:11px JetBrains Mono;color:#5a626f">Coming soon</div>
+<a href="#waitlist" class="btn-s" style="margin-top:12px;display:block;text-align:center">Notify me →</a>
+</div>
+</div>
+</div></div></div>
+
+<!-- WAITLIST -->
+<div id="waitlist" style="border-top:1px solid #1c2128;background:#0a0c10"><div class="sec"><div class="wrap" style="max-width:640px;text-align:center">
+<div class="eyebrow">Premium plans</div>
+<h2 class="h2" style="margin:14px auto 0">Free is live now. Get notified when Pro opens.</h2>
+<p class="sub" style="margin:14px auto 0;text-align:center">Checking claims is free today — <a href="DisMyth App.dc.html" style="color:oklch(0.82 0.12 150)">start now</a>. Leave your email and we'll tell you the moment DisMyth+ and Pro-Newsroom go on sale.</p>
+<form action="https://formspree.io/f/mnjeopbg" method="POST" style="margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<input type="email" name="email" required placeholder="you@example.com" style="flex:1;min-width:240px;max-width:340px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:14px 16px;color:#eef1f6;font:15px Inter"/>
+<button type="submit" class="btn-p" style="border:none;cursor:pointer">Notify me →</button>
+</form>
+<div style="margin-top:14px;font:11px JetBrains Mono;color:#5a626f">No spam · one email when paid plans open</div>
+</div></div></div>
+
+<!-- CTA -->
+<div class="sec"><div class="wrap" style="text-align:center">
+<h2 class="h2" style="margin:0 auto">Stop the next rumour in your feed.</h2>
+<p class="sub" style="margin:14px auto 0;text-align:center">Check your first claim in seconds — free, no account needed to try.</p>
+<div style="margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a href="DisMyth App.dc.html" class="btn-p">Open the app →</a><a href="#how" class="btn-s">How it works</a></div>
+</div></div>
+
+<!-- FOOTER -->
+<div style="border-top:1px solid #1c2128;background:#0a0c10"><div class="wrap" style="padding:36px 28px;display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:center">
+<div><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.72 0.15 145)"></span><span style="font:700 15px Space Grotesk;color:#f2f5f9">DisMyth</span></div><div style="font:11px JetBrains Mono;color:#5a626f;margin-top:8px">DISMISS THE LIE · CREATED BY REHAN IMAM WARIS</div></div>
+<div style="display:flex;gap:22px;font:13px Inter"><a href="#how">How it works</a><a href="#why">Why DisMyth</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="DisMyth Methodology.dc.html">Standards</a><a href="DisMyth App.dc.html">Open app</a></div>
+</div></div>
+</div>
+</x-dc>
+</body>
+</html>

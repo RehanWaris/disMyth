@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /brief.html
+Disallow: /api/
+Sitemap: https://dismyth.app/sitemap.xml

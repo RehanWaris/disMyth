@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Old drag-and-drop deploy artifact — no longer needed once Git deploy is on
+dismyth-site.zip
+
+# Never commit real secrets. Real keys live in Vercel env vars, not here.
+.env
+.env.local
+*.key

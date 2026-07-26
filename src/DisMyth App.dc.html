@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
+a{color:oklch(0.72 0.11 220);text-decoration:none}
+input,textarea{font-family:Inter,sans-serif}
+input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!important}
+@keyframes dmpulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes dmspin{to{transform:rotate(360deg)}}
+@keyframes dmgrow{from{width:6%}to{width:100%}}
+@keyframes dmup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dm-scr{position:absolute;inset:0;display:flex;flex-direction:column}
+.dm-body::-webkit-scrollbar{width:0}
+</style>
+</helmet>
+
+<div style="width:340px;height:720px;border-radius:46px;padding:11px;background:#000;box-shadow:0 40px 80px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);position:relative;flex:none">
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:28px;background:#000;border-radius:0 0 17px 17px;z-index:60"></div>
+<div style="width:100%;height:100%;border-radius:35px;overflow:hidden;position:relative;background:#0c0e12;color:#e8ecf2">
+
+<div style="position:absolute;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:15px 26px 6px;font:600 12px Inter;color:#e8ecf2">9:41<span style="letter-spacing:2px">● ● ●</span></div>
+
+<!-- ONBOARDING -->
+<sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ true }}">
+<div class="dm-scr" style="background:radial-gradient(120% 80% at 50% 0%,#141821,#0c0e12)">
+<div style="padding:42px 22px 8px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="font:700 17px Space Grotesk">DisMyth</div>
+<div onClick="{{ goFeed }}" style="font:11px JetBrains Mono;color:#5a626f;cursor:pointer">Skip →</div>
+</div>
+<div style="margin-top:16px;display:flex;gap:6px">
+<sc-for list="{{ stepDots }}" as="d" hint-placeholder-count="5"><div style="flex:1;height:4px;border-radius:3px;background:{{ d }}"></div></sc-for>
+</div>
+<div style="margin-top:14px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:1.5px">STEP {{ stepNo }} / 5</div>
+<div style="margin-top:4px;font:700 20px Space Grotesk;color:#eef1f6">{{ stepTitle }}</div>
+</div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:14px 22px 22px">
+
+<sc-if value="{{ isS0 }}" hint-placeholder-val="{{ true }}">
+<div style="font:12px/1.5 Inter;color:#7a828f;margin-bottom:16px">Create your DisMyth account to check claims and get alerts for your area.</div>
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">FULL NAME</div>
+<input value="{{ regName }}" onInput="{{ onName }}" placeholder="Rehan Imam Waris" style="width:100%;box-sizing:border-box;margin-top:6px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:13px;color:#eef1f6;font-size:14px"/>
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px;margin-top:16px">EMAIL OR PHONE</div>
+<input value="{{ regContact }}" onInput="{{ onContact }}" placeholder="you@example.com" style="width:100%;box-sizing:border-box;margin-top:6px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:13px;color:#eef1f6;font-size:14px"/>
+<div style="margin-top:18px;display:flex;gap:9px">
+<div style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Continue with Google</div>
+<div style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Apple</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isS1 }}" hint-placeholder-val="{{ false }}">
+<div style="font:12px/1.5 Inter;color:#7a828f;margin-bottom:16px">We flash corrections to people in the region where a false claim is spreading. Where are you?</div>
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">CITY / STATE / COUNTRY</div>
+<input value="{{ regRegion }}" onInput="{{ onRegion }}" placeholder="Chennai, Tamil Nadu, India" style="width:100%;box-sizing:border-box;margin-top:6px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:13px;color:#eef1f6;font-size:14px"/>
+<div style="margin-top:14px;display:flex;align-items:center;gap:9px;font:600 12px Inter;color:#04140b;background:oklch(0.72 0.15 145 / .16);border:1px solid oklch(0.72 0.15 145 / .4);color:oklch(0.82 0.12 150);border-radius:11px;padding:12px;cursor:pointer;justify-content:center">◎ Use my current location</div>
+<div style="margin-top:16px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">ALERT RADIUS</div>
+<div style="margin-top:8px;display:flex;gap:8px">
+<div style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px">City</div>
+<div style="flex:1;text-align:center;font:600 12px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:10px;padding:9px">State</div>
+<div style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px">Country</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isS2 }}" hint-placeholder-val="{{ false }}">
+<div style="font:12px/1.5 Inter;color:#7a828f;margin-bottom:16px">Pick topics you want checked and watched. Choose as many as you like.</div>
+<div style="display:flex;flex-wrap:wrap;gap:9px">
+<sc-for list="{{ topics }}" as="t" hint-placeholder-count="8"><div onClick="{{ t.toggle }}" style="font:600 12.5px Inter;padding:9px 14px;border-radius:22px;cursor:pointer;color:{{ t.col }};background:{{ t.bg }};border:1px solid {{ t.brd }}">{{ t.label }}</div></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isS3 }}" hint-placeholder-val="{{ false }}">
+<div style="font:12px/1.5 Inter;color:#7a828f;margin-bottom:16px">How should we reach you when a false claim hits your area?</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3">
+<div onClick="{{ n.toggle }}" style="display:flex;align-items:center;justify-content:space-between;background:#12151b;border:1px solid {{ n.brd }};border-radius:13px;padding:13px 14px;cursor:pointer">
+<div><div style="font:600 13px Inter;color:#eef1f6">{{ n.label }}</div><div style="font:10.5px JetBrains Mono;color:#5a626f">{{ n.sub }}</div></div>
+<div style="width:40px;height:23px;border-radius:12px;background:{{ n.track }};position:relative"><div style="position:absolute;top:2px;left:{{ n.knob }};width:19px;height:19px;border-radius:50%;background:#fff"></div></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isS4 }}" hint-placeholder-val="{{ false }}">
+<div style="font:12px/1.5 Inter;color:#7a828f;margin-bottom:14px">Start free forever. Upgrade anytime.</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ planPicks }}" as="pl" hint-placeholder-count="3">
+<div onClick="{{ pl.pick }}" style="background:#12151b;border:1px solid {{ pl.brd }};border-radius:14px;padding:14px;cursor:pointer">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:700 14px Space Grotesk;color:{{ pl.name_col }}">{{ pl.name }}</div><div style="font:700 13px Inter;color:#e8ecf2">{{ pl.price }}</div></div>
+<div style="margin-top:5px;font:11px/1.4 Inter;color:#7a828f">{{ pl.tag }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+</div>
+<div style="padding:12px 22px 22px;display:flex;gap:10px;border-top:1px solid #1c2128">
+<sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}"><div onClick="{{ obBack }}" style="width:54px;text-align:center;font:600 13px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:12px;padding:13px 0;cursor:pointer">←</div></sc-if>
+<div onClick="{{ obNext }}" style="flex:1;text-align:center;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:13px;cursor:pointer">{{ obNextLabel }}</div>
+</div>
+</div>
+</sc-if>
+
+<!-- FEED -->
+<sc-if value="{{ isFeed }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr">
+<div style="padding:40px 20px 14px;display:flex;align-items:center;justify-content:space-between">
+<div><div style="font:700 19px Space Grotesk;letter-spacing:.3px">DisMyth</div><div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">DISMISS THE LIE</div></div>
+<div style="display:flex;align-items:center;gap:6px;font:10px JetBrains Mono;color:oklch(0.72 0.15 145)"><span style="width:7px;height:7px;border-radius:50%;background:oklch(0.72 0.15 145);box-shadow:0 0 8px oklch(0.72 0.15 145);animation:dmpulse 1.6s infinite"></span>LIVE</div>
+</div>
+<div style="padding:2px 20px 10px;display:flex;align-items:center;gap:8px">
+<div style="font:11px Inter;color:#7a828f">Monitoring</div>
+<div style="font:600 11px Inter;color:#e8ecf2;background:#1c2128;border:1px solid #262c34;padding:4px 10px;border-radius:20px">◎ {{ region }}</div>
+</div>
+<div style="padding:0 20px 8px;display:flex;gap:8px">
+<div onClick="{{ goLedger }}" style="flex:1;display:flex;align-items:center;gap:8px;background:#12151b;border:1px solid #1c2128;border-radius:11px;padding:9px 11px;cursor:pointer"><span style="font:12px;color:oklch(0.72 0.15 145)">◆</span><div style="min-width:0"><div style="font:600 11px Inter;color:#eef1f6">{{ accuracy }}% accurate</div><div style="font:9px JetBrains Mono;color:#5a626f">median {{ medianTime }} · ledger</div></div></div>
+<div onClick="{{ goShare }}" style="flex:1;display:flex;align-items:center;gap:8px;background:#12151b;border:1px solid #1c2128;border-radius:11px;padding:9px 11px;cursor:pointer"><span style="font:12px;color:oklch(0.72 0.11 220)">↱</span><div style="min-width:0"><div style="font:600 11px Inter;color:#eef1f6">Share-check</div><div style="font:9px JetBrains Mono;color:#5a626f">catch lies before posting</div></div></div>
+</div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px">
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px;margin-bottom:10px">// REGIONAL_FEED</div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ feed }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.open }}" style="background:#12151b;border:1px solid #1c2128;border-radius:15px;padding:14px;cursor:pointer">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="font:700 10px JetBrains Mono;letter-spacing:1.5px;color:{{ c.ink }};background:{{ c.color }};padding:3px 9px;border-radius:6px">{{ c.sym }} {{ c.label }}</div>
+<div style="font:10px JetBrains Mono;color:#5a626f">{{ c.conf }}%</div>
+</div>
+<div style="margin-top:11px;font:500 13.5px/1.4 Space Grotesk;color:#eef1f6">{{ c.claim }}</div>
+<div style="margin-top:10px;display:flex;align-items:center;gap:8px;font:10.5px JetBrains Mono;color:#5a626f">◎ {{ c.location }}<span style="color:#333a44">·</span>{{ c.time }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- MAP -->
+<sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr">
+<div style="padding:40px 20px 12px"><div style="font:700 17px Space Grotesk">Spread map</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Where claims are circulating now</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:4px 20px 96px">
+<div style="position:relative;height:250px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#12151b,#171b22);border:1px solid #1c2128;background-image:linear-gradient(#1c2128 1px,transparent 1px),linear-gradient(90deg,#1c2128 1px,transparent 1px);background-size:34px 34px">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 22px,rgba(255,255,255,.012) 22px,rgba(255,255,255,.012) 24px)"></div>
+<div style="position:absolute;left:26%;top:60%"><div style="width:16px;height:16px;border-radius:50%;background:oklch(0.60 0.21 25);box-shadow:0 0 0 5px oklch(0.60 0.21 25 / .22)"></div></div>
+<div style="position:absolute;left:52%;top:30%"><div style="width:13px;height:13px;border-radius:50%;background:oklch(0.78 0.15 80);box-shadow:0 0 0 5px oklch(0.78 0.15 80 / .22)"></div></div>
+<div style="position:absolute;left:70%;top:64%"><div style="width:11px;height:11px;border-radius:50%;background:oklch(0.60 0.21 25);box-shadow:0 0 0 4px oklch(0.60 0.21 25 / .22)"></div></div>
+<div style="position:absolute;left:40%;top:46%"><div style="width:12px;height:12px;border-radius:50%;background:oklch(0.62 0.03 260);box-shadow:0 0 0 4px oklch(0.62 0.03 260 / .22)"></div></div>
+<div style="position:absolute;left:18px;bottom:14px;font:10px JetBrains Mono;color:#7a828f;background:rgba(0,0,0,.35);padding:5px 9px;border-radius:8px">MAP PLACEHOLDER · drop live geo-tiles here</div>
+</div>
+<div style="margin-top:14px;display:flex;gap:14px;font:10px JetBrains Mono;color:#7a828f">
+<span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.60 0.21 25)"></span>False</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.78 0.15 80)"></span>Misleading</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.62 0.03 260)"></span>Unverified</span>
+</div>
+<div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// ACTIVE_HOTSPOTS</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:12px 13px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:600 13px Inter">Chennai, Tamil Nadu</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Old flood video re-surfacing</div></div><div style="font:700 12px JetBrains Mono;color:oklch(0.78 0.15 80)">12.4k</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:12px 13px;display:flex;justify-content:space-between;align-items:center"><div><div style="font:600 13px Inter">Delhi NCR</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">False "CM Vijay rally" claim</div></div><div style="font:700 12px JetBrains Mono;color:oklch(0.72 0.19 25)">4.2k</div></div>
+</div>
+<div style="margin-top:20px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// TREND_RADAR · GAINING VELOCITY</div>
+<div style="margin-top:6px;font:10.5px/1.4 Inter;color:#7a828f">Narratives accelerating now — prebunk before they peak.</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ radar }}" as="rd" hint-placeholder-count="3">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:12px 13px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font:600 12px/1.3 Inter;color:#eef1f6;flex:1">{{ rd.label }}</div><div style="font:700 10px JetBrains Mono;color:{{ rd.color }};flex:none">{{ rd.vel }}</div></div>
+<div style="margin-top:9px;height:5px;background:#1c2128;border-radius:3px;overflow:hidden"><div style="width:{{ rd.w }};height:100%;background:{{ rd.color }};border-radius:3px"></div></div>
+<div style="margin-top:7px;font:9.5px JetBrains Mono;color:#5a626f">◎ {{ rd.region }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ALERTS -->
+<sc-if value="{{ isAlerts }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr">
+<div style="padding:40px 20px 12px"><div style="font:700 17px Space Grotesk">Alerts</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">False info flagged near you</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px;display:flex;flex-direction:column;gap:11px">
+<div style="background:oklch(0.60 0.21 25 / .12);border:1px solid oklch(0.60 0.21 25 / .4);border-radius:15px;padding:14px">
+<div style="display:flex;align-items:center;gap:8px;font:700 10px JetBrains Mono;letter-spacing:1.5px;color:oklch(0.72 0.19 25)">⚠ FALSE CLAIM · YOUR AREA</div>
+<div style="margin-top:9px;font:500 13.5px/1.4 Space Grotesk;color:#eef1f6">A false "CM Vijay to visit Jantar Mantar" post is spreading in Delhi &amp; Tamil Nadu.</div>
+<div style="margin-top:9px;font:11px JetBrains Mono;color:#7a828f">2m ago · 4,231 shares blocked from your circles</div>
+</div>
+<div style="background:oklch(0.78 0.15 80 / .1);border:1px solid oklch(0.78 0.15 80 / .35);border-radius:15px;padding:14px">
+<div style="display:flex;align-items:center;gap:8px;font:700 10px JetBrains Mono;letter-spacing:1.5px;color:oklch(0.82 0.13 80)">! MISLEADING MEDIA</div>
+<div style="margin-top:9px;font:500 13.5px/1.4 Space Grotesk;color:#eef1f6">An old 2015 Chennai flood video is being shared as current.</div>
+<div style="margin-top:9px;font:11px JetBrains Mono;color:#7a828f">18m ago · Chennai, Tamil Nadu</div>
+</div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:15px;padding:14px;text-align:center;color:#7a828f;font:11px Inter">Custom geo-alerts for saved topics are a <b style="color:#e8ecf2">DisMyth+</b> feature.</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ACCOUNT / PLANS -->
+<sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr">
+<div style="padding:40px 20px 12px;display:flex;align-items:center;justify-content:space-between"><div><div style="font:700 17px Space Grotesk">Plans</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Free to fight lies. Pay to broadcast truth.</div></div><div onClick="{{ goCompare }}" style="font:11px JetBrains Mono;color:oklch(0.72 0.11 220);cursor:pointer;text-align:right">Compare<br/>all →</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px;display:flex;flex-direction:column;gap:12px">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:16px;padding:16px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:700 14px Space Grotesk">Free</div><div style="font:700 14px Inter;color:#e8ecf2">₹0</div></div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:7px;font:12px/1.3 Inter;color:#c4ccd6">
+<div>✓ Unlimited claim checks</div><div>✓ Full verdict cards &amp; evidence</div><div>✓ Regional debunk feed &amp; map</div></div>
+<div style="margin-top:13px;text-align:center;font:600 12px Inter;color:#7a828f;border:1px solid #262c34;border-radius:10px;padding:9px">Current plan</div>
+</div>
+<div style="background:linear-gradient(160deg,#141821,#12151b);border:1px solid oklch(0.72 0.11 220 / .45);border-radius:16px;padding:16px;position:relative">
+<div style="position:absolute;top:-9px;right:14px;font:700 9px JetBrains Mono;letter-spacing:1px;color:#04140b;background:oklch(0.72 0.15 145);padding:3px 8px;border-radius:6px">POPULAR</div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:700 14px Space Grotesk;color:oklch(0.78 0.09 220)">DisMyth+</div><div style="font:700 14px Inter">₹149<span style="font:400 11px;color:#7a828f">/mo</span></div></div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:7px;font:12px/1.3 Inter;color:#c4ccd6">
+<div>✓ Everything in Free</div><div>✓ Custom geo-alerts for saved topics</div><div>✓ Priority checking · ad-free</div></div>
+<div style="margin-top:12px;display:flex;gap:8px">
+<div onClick="{{ goTopics }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Saved topics</div>
+<div onClick="{{ goAlertRules }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Alert rules</div>
+</div>
+<div style="margin-top:8px;text-align:center;font:700 12px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:10px;padding:10px;cursor:pointer">Upgrade to DisMyth+</div>
+</div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:16px;padding:16px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:700 14px Space Grotesk">Pro · Newsroom</div><div style="font:700 14px Inter">₹4,999<span style="font:400 11px;color:#7a828f">/mo</span></div></div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:7px;font:12px/1.3 Inter;color:#c4ccd6">
+<div>✓ Auto-post composer → X · FB · IG · Threads</div><div>✓ 24/7 monitoring dashboard + API</div><div>✓ Team seats &amp; multi-account publishing</div></div>
+<div style="margin-top:12px;display:flex;gap:8px">
+<div onClick="{{ goMonitor }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Dashboard</div>
+<div onClick="{{ goTeam }}" style="flex:1;text-align:center;font:600 11px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:10px;padding:9px;cursor:pointer">Team &amp; API</div>
+</div>
+<div style="margin-top:8px;text-align:center;font:700 12px Inter;color:#e8ecf2;border:1px solid #262c34;border-radius:10px;padding:10px;cursor:pointer">Contact sales</div>
+</div>
+<div style="text-align:center;font:10px JetBrains Mono;color:#5a626f;padding:6px 0 2px">DISMISS THE LIE · CREATED BY REHAN IMAM WARIS</div>
+</div>
+</div>
+</sc-if>
+
+<!-- COMPARE -->
+<sc-if value="{{ isCompare }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goAccount }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Compare plans</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:8px 16px 30px">
+<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:0;font:11px Inter">
+<div style="padding:10px 6px;font:10px JetBrains Mono;color:#5a626f"></div>
+<div style="padding:10px 4px;text-align:center;font:700 11px Space Grotesk;color:#c4ccd6">Free</div>
+<div style="padding:10px 4px;text-align:center;font:700 11px Space Grotesk;color:oklch(0.78 0.09 220)">+</div>
+<div style="padding:10px 4px;text-align:center;font:700 11px Space Grotesk;color:oklch(0.82 0.12 150)">Pro</div>
+<sc-for list="{{ compareRows }}" as="r" hint-placeholder-count="8">
+<div style="padding:11px 6px;border-top:1px solid #1c2128;font:12px/1.3 Inter;color:#c4ccd6">{{ r.label }}</div>
+<div style="padding:11px 4px;border-top:1px solid #1c2128;text-align:center;color:{{ r.freeC }}">{{ r.free }}</div>
+<div style="padding:11px 4px;border-top:1px solid #1c2128;text-align:center;color:{{ r.plusC }}">{{ r.plus }}</div>
+<div style="padding:11px 4px;border-top:1px solid #1c2128;text-align:center;color:{{ r.proC }}">{{ r.pro }}</div>
+</sc-for>
+<div style="padding:12px 6px 4px;border-top:1px solid #262c34;font:10px JetBrains Mono;color:#5a626f">PRICE</div>
+<div style="padding:12px 4px 4px;border-top:1px solid #262c34;text-align:center;font:700 11px Inter;color:#e8ecf2">₹0</div>
+<div style="padding:12px 4px 4px;border-top:1px solid #262c34;text-align:center;font:700 11px Inter;color:#e8ecf2">₹149</div>
+<div style="padding:12px 4px 4px;border-top:1px solid #262c34;text-align:center;font:700 11px Inter;color:#e8ecf2">₹4,999</div>
+</div>
+<div style="margin-top:16px;text-align:center;font:10px JetBrains Mono;color:#5a626f">DISMISS THE LIE · REHAN IMAM WARIS</div>
+</div>
+</div>
+</sc-if>
+
+<!-- SAVED TOPICS (+) -->
+<sc-if value="{{ isTopicsMgr }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goAccount }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Saved topics</div><div style="margin-left:auto;font:9px JetBrains Mono;color:#04140b;background:oklch(0.78 0.09 220);padding:3px 8px;border-radius:6px">DisMyth+</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<div style="font:11px/1.5 Inter;color:#7a828f;margin-bottom:14px">Topics you're watching. We check &amp; alert you the moment a matching false claim appears in your region.</div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<input placeholder="Add a topic or keyword…" style="flex:1;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 13px;color:#eef1f6;font-size:13px"/>
+<div style="width:44px;text-align:center;font:700 18px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:11px;padding:9px 0;cursor:pointer">+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ savedTopics }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;justify-content:space-between;background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:13px 14px">
+<div><div style="font:600 13px Inter;color:#eef1f6">{{ s.name }}</div><div style="font:10.5px JetBrains Mono;color:#5a626f;margin-top:2px">◎ {{ s.region }} · {{ s.hits }}</div></div>
+<div style="width:40px;height:23px;border-radius:12px;background:{{ s.track }};position:relative"><div style="position:absolute;top:2px;left:{{ s.knob }};width:19px;height:19px;border-radius:50%;background:#fff"></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ALERT RULES (+) -->
+<sc-if value="{{ isAlertRules }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goAccount }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Alert rules</div><div style="margin-left:auto;font:9px JetBrains Mono;color:#04140b;background:oklch(0.78 0.09 220);padding:3px 8px;border-radius:6px">DisMyth+</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<div style="font:11px/1.5 Inter;color:#7a828f;margin-bottom:14px">Tell DisMyth exactly when and how to alert you.</div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ alertRules }}" as="r" hint-placeholder-count="3">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px 14px">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:600 13px Inter;color:#eef1f6">{{ r.name }}</div><div style="width:40px;height:23px;border-radius:12px;background:{{ r.track }};position:relative"><div style="position:absolute;top:2px;left:{{ r.knob }};width:19px;height:19px;border-radius:50%;background:#fff"></div></div></div>
+<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ r.tags }}" as="tg" hint-placeholder-count="2"><span style="font:10px JetBrains Mono;color:#c4ccd6;background:#1c2128;border-radius:6px;padding:4px 8px">{{ tg }}</span></sc-for>
+</div>
+</div>
+</sc-for>
+<div style="text-align:center;font:600 12px Inter;color:oklch(0.82 0.12 150);border:1px dashed #262c34;border-radius:13px;padding:13px;cursor:pointer">+ New alert rule</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- MONITORING DASHBOARD (Pro) -->
+<sc-if value="{{ isMonitor }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goAccount }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Monitoring</div><div style="margin-left:auto;font:9px JetBrains Mono;color:#e8ecf2;background:#1c2128;padding:3px 8px;border-radius:6px">PRO</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">18,204</div><div style="font:10px JetBrains Mono;color:#5a626f;margin-top:2px">CHECKED TODAY</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:oklch(0.72 0.19 25)">1,342</div><div style="font:10px JetBrains Mono;color:#5a626f;margin-top:2px">FALSE FLAGGED</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:oklch(0.72 0.15 145)">27</div><div style="font:10px JetBrains Mono;color:#5a626f;margin-top:2px">REGIONS ACTIVE</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">96%</div><div style="font:10px JetBrains Mono;color:#5a626f;margin-top:2px">AUTO-RESOLVED</div></div>
+</div>
+<div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// TRENDING_FALSE_CLAIMS</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ trending }}" as="t" hint-placeholder-count="4">
+<div><div style="display:flex;justify-content:space-between;font:12px Inter;color:#c4ccd6"><span>{{ t.label }}</span><span style="font:10px JetBrains Mono;color:#5a626f">{{ t.val }}</span></div>
+<div style="margin-top:6px;height:6px;background:#1c2128;border-radius:4px;overflow:hidden"><div style="width:{{ t.w }};height:100%;background:{{ t.color }};border-radius:4px"></div></div></div>
+</sc-for>
+</div>
+<div style="margin-top:16px;text-align:center;font:600 12px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:12px;cursor:pointer">Export report · CSV</div>
+</div>
+</div>
+</sc-if>
+
+<!-- TEAM & API (Pro) -->
+<sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goAccount }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Team &amp; API</div><div style="margin-left:auto;font:9px JetBrains Mono;color:#e8ecf2;background:#1c2128;padding:3px 8px;border-radius:6px">PRO</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// TEAM · 3 SEATS</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:11px;background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:11px 13px">
+<div style="width:32px;height:32px;border-radius:50%;background:#1c2128;display:grid;place-items:center;font:700 12px Space Grotesk;color:#c4ccd6;flex:none">{{ m.ini }}</div>
+<div style="flex:1"><div style="font:600 13px Inter;color:#eef1f6">{{ m.name }}</div><div style="font:10.5px JetBrains Mono;color:#5a626f">{{ m.email }}</div></div>
+<div style="font:10px JetBrains Mono;color:oklch(0.78 0.09 220);background:#1c2128;padding:3px 8px;border-radius:6px">{{ m.role }}</div>
+</div>
+</sc-for>
+<div style="text-align:center;font:600 12px Inter;color:oklch(0.82 0.12 150);border:1px dashed #262c34;border-radius:13px;padding:12px;cursor:pointer">+ Invite teammate</div>
+</div>
+<div style="margin-top:20px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// API_ACCESS</div>
+<div style="margin-top:11px;background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:13px">
+<div style="font:11px Inter;color:#7a828f">Secret key</div>
+<div style="margin-top:7px;display:flex;align-items:center;gap:8px;background:#0c0e12;border:1px solid #262c34;border-radius:9px;padding:9px 11px"><span style="flex:1;font:11px JetBrains Mono;color:#c4ccd6">dm_live_••••••••••••4f2a</span><span style="font:10px JetBrains Mono;color:oklch(0.72 0.11 220);cursor:pointer">Copy</span></div>
+<div style="margin-top:11px;font:11px Inter;color:#7a828f">Usage this month</div>
+<div style="margin-top:6px;height:6px;background:#1c2128;border-radius:4px;overflow:hidden"><div style="width:64%;height:100%;background:oklch(0.72 0.15 145);border-radius:4px"></div></div>
+<div style="margin-top:6px;font:10px JetBrains Mono;color:#5a626f">640k / 1M checks</div>
+</div>
+<div style="margin-top:12px;background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:13px;font:11px/1.5 Inter;color:#7a828f">Docs: <a>api.dismyth.app/docs</a> · webhooks, bulk verify, embed widgets.</div>
+</div>
+</div>
+</sc-if>
+
+<!-- SUBMIT -->
+<sc-if value="{{ isSubmit }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 10px;display:flex;align-items:center;gap:12px"><div onClick="{{ goFeed }}" style="font:16px Inter;cursor:pointer;color:#7a828f">✕</div><div style="font:700 15px Space Grotesk">Check a claim</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// PASTE_TEXT_LINK_OR_UPLOAD</div>
+<textarea value="{{ submitText }}" onInput="{{ onSubmitText }}" placeholder="Paste a claim, or add a caption for your link / photo / video…" style="width:100%;box-sizing:border-box;margin-top:11px;background:#12151b;border:1px solid #262c34;border-radius:15px;padding:15px;min-height:165px;font:400 14px/1.5 Inter;color:#eef1f6;resize:none"></textarea>
+<div style="margin-top:13px;display:flex;gap:9px">
+<div onClick="{{ pickLink }}" style="flex:1;text-align:center;font:600 12px Inter;color:{{ tLinkC }};background:{{ tLinkB }};border:1px solid {{ tLinkBr }};border-radius:11px;padding:11px 6px;cursor:pointer">🔗 Link</div>
+<div onClick="{{ pickPhoto }}" style="flex:1;text-align:center;font:600 12px Inter;color:{{ tPhotoC }};background:{{ tPhotoB }};border:1px solid {{ tPhotoBr }};border-radius:11px;padding:11px 6px;cursor:pointer">🖼 Photo</div>
+<div onClick="{{ pickVideo }}" style="flex:1;text-align:center;font:600 12px Inter;color:{{ tVideoC }};background:{{ tVideoB }};border:1px solid {{ tVideoBr }};border-radius:11px;padding:11px 6px;cursor:pointer">🎬 Video</div>
+</div>
+<div style="margin-top:11px;display:flex;gap:9px;align-items:flex-start;background:#12151b;border:1px dashed #262c34;border-radius:12px;padding:11px 12px"><span style="font:12px JetBrains Mono;color:oklch(0.72 0.15 145);flex:none">›</span><div style="font:11px/1.55 Inter;color:#9aa3b0">{{ pickHint }}</div></div>
+<input type="file" accept="image/*" ref="{{ photoRef }}" onChange="{{ onPhoto }}" style="display:none"/>
+<input type="file" accept="video/*" ref="{{ videoRef }}" onChange="{{ onVideo }}" style="display:none"/>
+<sc-if value="{{ isLink }}" hint-placeholder-val="{{ false }}">
+<input value="{{ linkUrl }}" onInput="{{ onLink }}" placeholder="https://…  paste the post or article URL" style="width:100%;box-sizing:border-box;margin-top:11px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:12px;color:#eef1f6;font-size:13px"/>
+</sc-if>
+<sc-if value="{{ hasFile }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:11px;display:flex;align-items:center;gap:11px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:11px 12px">
+<div style="width:44px;height:44px;border-radius:9px;background:#1c2128 center/cover no-repeat;background-image:{{ fileThumb }};display:grid;place-items:center;font:18px Inter;flex:none">{{ fileIcon }}</div>
+<div style="flex:1;min-width:0"><div style="font:600 12px Inter;color:#eef1f6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ fileName }}</div><div style="font:10px JetBrains Mono;color:#5a626f">attached · will be checked</div></div>
+<div onClick="{{ clearFile }}" style="font:14px Inter;color:#7a828f;cursor:pointer">✕</div>
+</div>
+</sc-if>
+<div style="margin-top:16px;font:11px/1.5 Inter;color:#7a828f">DisMyth cross-checks against trusted sources and the live web with AI, then traces where a claim is spreading.</div>
+<div onClick="{{ runCheck }}" style="margin-top:20px;text-align:center;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:13px;padding:14px;cursor:pointer">Verify now →</div>
+</div>
+</div>
+</sc-if>
+
+<!-- CHECKING -->
+<sc-if value="{{ isChecking }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="align-items:center;justify-content:center;padding:0 34px;background:#0c0e12">
+<div style="width:54px;height:54px;border-radius:50%;border:3px solid #1c2128;border-top-color:oklch(0.72 0.15 145);animation:dmspin .9s linear infinite"></div>
+<div style="margin-top:22px;font:600 15px Space Grotesk;color:#eef1f6;text-align:center">Cross-referencing sources worldwide…</div>
+<div style="margin-top:26px;width:100%;height:5px;background:#1c2128;border-radius:3px;overflow:hidden"><div style="height:100%;background:oklch(0.72 0.15 145);animation:dmgrow 2.6s ease forwards"></div></div>
+<div style="margin-top:22px;width:100%;display:flex;flex-direction:column;gap:10px;font:11.5px JetBrains Mono;color:#7a828f">
+<div style="animation:dmup .4s .2s both">↳ scanning verified news &amp; records…</div>
+<div style="animation:dmup .4s .8s both">↳ checking web + AI cross-sources…</div>
+<div style="animation:dmup .4s 1.4s both">↳ tracing origin &amp; spread…</div>
+</div>
+</div>
+</sc-if>
+
+<!-- VERDICT -->
+<sc-if value="{{ isVerdict }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goFeed }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Verdict</div><div style="margin-left:auto;font:9px JetBrains Mono;color:oklch(0.72 0.15 145);background:oklch(0.72 0.15 145 / .14);padding:3px 8px;border-radius:6px">◇ MULTI-AI</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:8px 20px 30px">
+
+<sc-if value="{{ sel.contested }}" hint-placeholder-val="{{ false }}">
+<div style="margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;background:oklch(0.74 0.13 60 / .12);border:1px solid oklch(0.74 0.13 60 / .4);border-radius:13px;padding:12px 13px">
+<div style="font:15px Inter">⚖</div><div style="font:11.5px/1.4 Inter;color:#e8d9b8">Models disagree on this claim. It's marked <b>Contested</b> and auto-escalated to human review before any broadcast.</div>
+</div>
+</sc-if>
+
+<div style="border-radius:16px;padding:17px 18px 15px;background:{{ sel.color }};box-shadow:0 16px 40px -16px {{ sel.color }}">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:700 31px/.9 Space Grotesk;letter-spacing:-.6px;color:{{ sel.ink }}">{{ sel.label }}</div><div style="font:600 20px JetBrains Mono;color:{{ sel.ink }};opacity:.85">{{ sel.sym }}</div></div>
+<div style="margin-top:13px;display:flex;align-items:center;gap:10px"><div style="flex:1;height:7px;background:rgba(0,0,0,.22);border-radius:5px;overflow:hidden"><div style="width:{{ sel.bar }};height:100%;background:{{ sel.ink }};border-radius:5px"></div></div><div style="font:700 12px JetBrains Mono;color:{{ sel.ink }}">{{ sel.conf }}%</div></div>
+</div>
+
+<div style="margin-top:15px;font:500 15.5px/1.42 Space Grotesk;color:#f2f5f9">{{ sel.claim }}</div>
+
+<div style="margin-top:13px;background:#12151b;border:1px solid #1c2128;border-radius:12px;padding:12px 13px">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// CONFIDENCE_RANGE</div><div style="font:10px JetBrains Mono;color:#c4ccd6">{{ sel.band.lo }}–{{ sel.band.hi }}%</div></div>
+<div style="margin-top:9px;position:relative;height:8px;background:#0c0e12;border:1px solid #1c2128;border-radius:5px">
+<div style="position:absolute;top:0;bottom:0;left:{{ sel.band.lo }}%;width:{{ sel.band.span }}%;background:{{ sel.agreeBarColor }};opacity:.4;border-radius:5px"></div>
+<div style="position:absolute;top:50%;left:{{ sel.bar }};transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #0c0e12;box-shadow:0 0 0 1px rgba(255,255,255,.15)"></div>
+</div>
+<div style="margin-top:11px;display:flex;gap:9px;align-items:flex-start"><span style="color:oklch(0.72 0.11 220);font:11px Inter">↻</span><div style="font:11px/1.45 Inter;color:#c4ccd6"><b style="color:#eef1f6">What would change this verdict:</b> {{ sel.whatChanges }}</div></div>
+</div>
+
+<div style="margin-top:20px;display:flex;align-items:center;justify-content:space-between"><div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// AI_CONSENSUS</div><div style="font:10px JetBrains Mono;color:#c4ccd6">{{ sel.agreeText }}</div></div>
+<div style="margin-top:9px;height:6px;background:#1c2128;border-radius:4px;overflow:hidden"><div style="width:{{ sel.agreement }}%;height:100%;background:{{ sel.agreeBarColor }};border-radius:4px"></div></div>
+<div style="margin-top:11px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<sc-for list="{{ sel.models }}" as="m" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:8px;background:#12151b;border:1px solid #1c2128;border-radius:11px;padding:9px 10px">
+<span style="width:9px;height:9px;border-radius:50%;background:{{ m.dot }};flex:none"></span>
+<div style="flex:1;min-width:0"><div style="font:600 11.5px Inter;color:#eef1f6;display:flex;align-items:center;gap:5px">{{ m.name }}<span style="font:8px JetBrains Mono;color:#5a626f">{{ m.liveTag }}</span></div><div style="font:9.5px JetBrains Mono;color:#7a828f">{{ m.vlabel }} · {{ m.conf }}%</div></div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// HOW_WE_CHECKED</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ sel.checks }}" as="ck" hint-placeholder-count="2"><div style="display:flex;gap:10px;font:12px/1.35 Inter;color:#c4ccd6"><span style="color:oklch(0.72 0.15 145);font:12px JetBrains Mono">{{ ck.n }}</span>{{ ck.text }}</div></sc-for>
+</div>
+
+<sc-if value="{{ sel.hasForensics }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// MEDIA_FORENSICS</div>
+<div style="margin-top:10px;background:#12151b;border:1px solid #1c2128;border-radius:12px;padding:13px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font:600 13px Space Grotesk;color:{{ sel.forensics.color }}">{{ sel.forensics.headline }}</div><div style="font:8.5px JetBrains Mono;color:{{ sel.forensics.color }};border:1px solid {{ sel.forensics.color }};border-radius:5px;padding:2px 7px;flex:none">{{ sel.forensics.tag }}</div></div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ sel.forensics.signals }}" as="sg" hint-placeholder-count="3">
+<div><div style="display:flex;justify-content:space-between;font:11px Inter;color:#c4ccd6"><span>{{ sg.label }}</span><span style="font:10px JetBrains Mono;color:#7a828f">{{ sg.val }}</span></div>
+<div style="margin-top:5px;height:5px;background:#1c2128;border-radius:3px;overflow:hidden"><div style="width:{{ sg.w }};height:100%;background:{{ sg.color }};border-radius:3px"></div></div></div>
+</sc-for>
+</div>
+<div style="margin-top:11px;font:11px/1.45 Inter;color:#7a828f">{{ sel.forensics.note }}</div>
+</div>
+</sc-if>
+
+<div style="margin-top:18px;display:flex;align-items:center;gap:9px">
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// SOURCES · {{ sel.sourceCount }} CITED</div>
+<sc-if value="{{ showExplainers }}" hint-placeholder-val="{{ true }}"><div onClick="{{ toggleSources }}" style="font:9px JetBrains Mono;color:oklch(0.72 0.11 220);cursor:pointer;border:1px solid #1c2128;border-radius:20px;padding:2px 9px">ⓘ what's this?</div></sc-if>
+</div>
+<sc-if value="{{ exSources }}" hint-placeholder-val="{{ false }}"><div style="margin-top:9px;font:11px/1.55 Inter;color:#9aa3b0;background:#12151b;border:1px dashed #262c34;border-radius:11px;padding:11px 13px">{{ sourcesHelp }}</div></sc-if>
+<div style="margin-top:10px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ sel.evidence }}" as="ev" hint-placeholder-count="2">
+<a href="{{ ev.href }}" target="_blank" rel="noopener" style="display:block;background:#12151b;border:1px solid #1c2128;border-radius:11px;padding:10px 12px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font:11.5px JetBrains Mono;color:oklch(0.72 0.11 220);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">↗ {{ ev.source }}</div><div style="font:8.5px JetBrains Mono;color:{{ ev.typeColor }};border:1px solid {{ ev.typeColor }};border-radius:5px;padding:2px 6px;flex:none">{{ ev.type }}</div></div>
+<sc-if value="{{ showWeights }}" hint-placeholder-val="{{ true }}"><div style="margin-top:8px;display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:#1c2128;border-radius:3px;overflow:hidden"><div style="width:{{ ev.w }};height:100%;background:{{ ev.typeColor }};border-radius:3px"></div></div><div style="font:9px JetBrains Mono;color:#7a828f">{{ ev.w }} trust</div></div></sc-if>
+</a>
+</sc-for>
+</div>
+
+<div style="margin-top:18px;display:flex;align-items:center;gap:9px">
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// ORIGIN_&_MUTATION</div>
+<sc-if value="{{ showExplainers }}" hint-placeholder-val="{{ true }}"><div onClick="{{ toggleOrigin }}" style="font:9px JetBrains Mono;color:oklch(0.72 0.11 220);cursor:pointer;border:1px solid #1c2128;border-radius:20px;padding:2px 9px">ⓘ what's this?</div></sc-if>
+</div>
+<sc-if value="{{ exOrigin }}" hint-placeholder-val="{{ false }}"><div style="margin-top:9px;font:11px/1.55 Inter;color:#9aa3b0;background:#12151b;border:1px dashed #262c34;border-radius:11px;padding:11px 13px">{{ originHelp }}</div></sc-if>
+<div style="margin-top:11px;background:#12151b;border:1px solid #1c2128;border-radius:12px;padding:14px 14px 2px">
+<sc-for list="{{ sel.timeline }}" as="tl" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;padding-bottom:14px">
+<div style="display:flex;flex-direction:column;align-items:center;flex:none;width:11px"><span style="width:11px;height:11px;border-radius:50%;background:{{ tl.dot }};border:2px solid #12151b;box-shadow:0 0 0 1px {{ tl.dot }}"></span><span style="flex:1;width:2px;background:#1c2128;margin-top:3px"></span></div>
+<div style="margin-top:-2px;flex:1"><div style="display:flex;align-items:center;gap:8px"><span style="font:8.5px JetBrains Mono;letter-spacing:1px;color:{{ tl.dot }}">{{ tl.tag }}</span><span style="font:9px JetBrains Mono;color:#5a626f">{{ tl.t }}</span></div><div style="margin-top:4px;font:11.5px/1.4 Inter;color:#c4ccd6">{{ tl.text }}</div></div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:16px;display:flex;align-items:center;gap:9px">
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// NEUTRALITY_&_BIAS</div>
+<sc-if value="{{ showExplainers }}" hint-placeholder-val="{{ true }}"><div onClick="{{ toggleBias }}" style="font:9px JetBrains Mono;color:oklch(0.72 0.11 220);cursor:pointer;border:1px solid #1c2128;border-radius:20px;padding:2px 9px">ⓘ what's this?</div></sc-if>
+</div>
+<sc-if value="{{ exBias }}" hint-placeholder-val="{{ false }}"><div style="margin-top:9px;font:11px/1.55 Inter;color:#9aa3b0;background:#12151b;border:1px dashed #262c34;border-radius:11px;padding:11px 13px">{{ biasHelp }}</div></sc-if>
+<div style="margin-top:10px;background:#12151b;border:1px solid #1c2128;border-radius:12px;padding:13px">
+<div style="position:relative;height:6px;background:linear-gradient(90deg,oklch(0.6 0.16 25),#2a3038 45%,#2a3038 55%,oklch(0.6 0.14 250));border-radius:4px">
+<div style="position:absolute;top:50%;left:{{ sel.bias.pos }};transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #0c0e12;box-shadow:0 0 0 2px rgba(255,255,255,.15)"></div>
+</div>
+<div style="margin-top:8px;display:flex;justify-content:space-between;font:9px JetBrains Mono;color:#5a626f"><span>LEFT</span><span>CENTER</span><span>RIGHT</span></div>
+<div style="margin-top:10px;font:11.5px/1.4 Inter;color:#c4ccd6"><b style="color:#eef1f6">{{ sel.bias.leaning }}.</b> {{ sel.bias.note }}</div>
+</div>
+
+<div style="margin-top:18px;display:flex;gap:10px">
+<div onClick="{{ openCompose }}" style="flex:1;text-align:center;font:700 13px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:13px;cursor:pointer">⇄ Broadcast fact</div>
+<div style="width:48px;text-align:center;font:15px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:12px 0;cursor:pointer">↗</div>
+</div>
+<div onClick="{{ openDispute }}" style="margin-top:9px;text-align:center;font:600 11.5px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:12px;padding:11px;cursor:pointer">⚑ Dispute · request human review</div>
+<div style="margin-top:9px;text-align:center;font:10px/1.4 JetBrains Mono;color:#5a626f">Broadcasting is a Pro feature · high-stakes claims need human sign-off</div>
+</div>
+</div>
+</sc-if>
+
+<!-- DISPUTE / HUMAN REVIEW -->
+<sc-if value="{{ isDispute }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ openVerdictBack }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Request human review</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<sc-if value="{{ notDisputeSent }}" hint-placeholder-val="{{ true }}">
+<div style="font:11.5px/1.5 Inter;color:#7a828f;margin-bottom:15px">Think the verdict is off? Escalate it to DisMyth's review board — senior fact-checkers plus vetted community reviewers.</div>
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:1.5px">WHAT'S WRONG?</div>
+<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ disputeReasons }}" as="r" hint-placeholder-count="5"><div onClick="{{ r.pick }}" style="font:600 12px Inter;padding:9px 13px;border-radius:20px;cursor:pointer;color:{{ r.col }};background:{{ r.bg }};border:1px solid {{ r.brd }}">{{ r.label }}</div></sc-for>
+</div>
+<div style="margin-top:16px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:1.5px">ADD CONTEXT OR A BETTER SOURCE</div>
+<textarea value="{{ disputeNote }}" onInput="{{ onDisputeNote }}" placeholder="Optional — paste a source or explain what's missing…" style="width:100%;box-sizing:border-box;margin-top:9px;background:#12151b;border:1px solid #262c34;border-radius:13px;padding:13px;min-height:90px;font:400 13px/1.5 Inter;color:#eef1f6;resize:none"></textarea>
+<div onClick="{{ submitDispute }}" style="margin-top:18px;text-align:center;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:13px;padding:14px;cursor:pointer">Submit for review →</div>
+<div style="margin-top:10px;font:10px/1.5 JetBrains Mono;color:#5a626f;text-align:center">Reviewed within 24h · verdict is held from re-broadcast until resolved</div>
+</sc-if>
+<sc-if value="{{ disputeSent }}" hint-placeholder-val="{{ false }}">
+<div style="padding:36px 0;text-align:center">
+<div style="width:66px;height:66px;border-radius:50%;margin:0 auto;background:oklch(0.72 0.15 145 / .16);border:1px solid oklch(0.72 0.15 145 / .5);display:grid;place-items:center;font:26px Inter">⚖</div>
+<div style="margin-top:20px;font:700 17px Space Grotesk;color:#eef1f6">Escalated to review</div>
+<div style="margin-top:8px;font:12.5px/1.5 Inter;color:#7a828f;max-width:245px;margin:8px auto 0">Senior fact-checkers and community reviewers have been notified. You'll get an update within 24 hours. The verdict is held from re-broadcast until resolved.</div>
+<div style="margin-top:18px;font:10px JetBrains Mono;color:#c4ccd6;background:#12151b;border:1px solid #1c2128;border-radius:8px;padding:8px 12px;display:inline-block">CASE #DM-{{ caseId }}</div>
+<div onClick="{{ goFeed }}" style="margin-top:22px;display:inline-block;font:600 12px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:11px;padding:11px 22px;cursor:pointer">Back to feed</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- COMPOSE -->
+<sc-if value="{{ isCompose }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ openVerdictBack }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Broadcast the fact</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:8px 20px 30px">
+<sc-if value="{{ notPublished }}" hint-placeholder-val="{{ true }}">
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// POST_PREVIEW</div>
+<div style="margin-top:11px;background:#12151b;border:1px solid #262c34;border-radius:14px;padding:14px;font:400 13px/1.5 Inter;color:#eef1f6">{{ postText }}</div>
+<div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// CHANNELS · POST SIMULTANEOUSLY</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ platforms }}" as="p" hint-placeholder-count="4">
+<div onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:12px;background:#12151b;border:1px solid {{ p.border }};border-radius:13px;padding:11px 13px;cursor:pointer">
+<div style="width:32px;height:32px;border-radius:9px;background:#1c2128;display:grid;place-items:center;font:700 13px Space Grotesk;color:#e8ecf2;flex:none">{{ p.glyph }}</div>
+<div style="flex:1"><div style="font:600 13px Inter;color:#eef1f6">{{ p.name }}</div><div style="font:10.5px JetBrains Mono;color:#5a626f">{{ p.handle }}</div></div>
+<div style="width:40px;height:23px;border-radius:12px;background:{{ p.track }};position:relative;transition:background .15s"><div style="position:absolute;top:2px;left:{{ p.knob }};width:19px;height:19px;border-radius:50%;background:#fff;transition:left .15s"></div></div>
+</div>
+</sc-for>
+</div>
+<div onClick="{{ publish }}" style="margin-top:20px;text-align:center;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:13px;padding:14px;cursor:pointer">Publish to {{ activeCount }} channels →</div>
+<div style="margin-top:9px;text-align:center;font:10px JetBrains Mono;color:#5a626f">Reaches followers + everyone in the affected region</div>
+</sc-if>
+<sc-if value="{{ published }}" hint-placeholder-val="{{ false }}">
+<div style="padding:40px 0;text-align:center">
+<div style="width:66px;height:66px;border-radius:50%;margin:0 auto;background:oklch(0.72 0.15 145);display:grid;place-items:center;font:700 30px Inter;color:#04140b">✓</div>
+<div style="margin-top:20px;font:700 17px Space Grotesk;color:#eef1f6">Broadcast live</div>
+<div style="margin-top:8px;font:12.5px/1.5 Inter;color:#7a828f;max-width:230px;margin-left:auto;margin-right:auto">The fact-checked correction posted to {{ activeCount }} channels and pushed to users in the affected region.</div>
+<div style="margin-top:22px;display:flex;justify-content:center;gap:8px;font:11px JetBrains Mono;color:#c4ccd6"><sc-for list="{{ activeGlyphs }}" as="g" hint-placeholder-count="4"><span style="width:30px;height:30px;border-radius:8px;background:#1c2128;display:grid;place-items:center;font:700 12px Space Grotesk">{{ g }}</span></sc-for></div>
+<div onClick="{{ goFeed }}" style="margin-top:26px;display:inline-block;font:600 12px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:11px;padding:11px 22px;cursor:pointer">Back to feed</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- SHARE-CHECK -->
+<sc-if value="{{ isShare }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goFeed }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Share-check</div><div style="margin-left:auto;font:9px JetBrains Mono;color:oklch(0.72 0.11 220);background:#12151b;border:1px solid #1c2128;padding:3px 8px;border-radius:6px">BETA</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<div style="font:11.5px/1.5 Inter;color:#7a828f;margin-bottom:15px">DisMyth sits inside your share sheet. The instant you try to post something our AI consensus rated false, it stops you — before your followers ever see it.</div>
+<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// YOU’RE_ABOUT_TO_POST</div>
+<div style="margin-top:11px;background:#12151b;border:1px solid #262c34;border-radius:15px;padding:14px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:#1c2128;display:grid;place-items:center;font:700 12px Space Grotesk;color:#c4ccd6">RW</div><div><div style="font:600 12.5px Inter;color:#eef1f6">You</div><div style="font:10px JetBrains Mono;color:#5a626f">posting now · public</div></div></div>
+<div style="margin-top:11px;font:400 13.5px/1.5 Inter;color:#e8ecf2">TN CM Vijay to visit Jantar Mantar rally in Delhi to meet the protestors. Share fast!</div>
+<div style="margin-top:12px;display:flex;align-items:center;gap:14px;font:14px Inter;color:#5a626f">🖼 😊 📍<div onClick="{{ shareTryPost }}" style="margin-left:auto;font:700 12px Inter;color:#fff;background:oklch(0.55 0.16 250);border-radius:20px;padding:8px 20px;cursor:pointer">Post</div></div>
+</div>
+<sc-if value="{{ shareCaught }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:14px;background:oklch(0.60 0.21 25 / .12);border:1px solid oklch(0.60 0.21 25 / .5);border-radius:15px;padding:15px;animation:dmup .3s both">
+<div style="display:flex;align-items:center;gap:8px;font:700 10px JetBrains Mono;letter-spacing:1.5px;color:oklch(0.72 0.19 25)">✕ DISMYTH CAUGHT THIS</div>
+<div style="margin-top:12px;display:flex;align-items:center;gap:11px">
+<div style="font:700 20px Space Grotesk;color:oklch(0.72 0.19 25)">FALSE</div>
+<div style="flex:1;height:6px;background:rgba(0,0,0,.28);border-radius:4px;overflow:hidden"><div style="width:94%;height:100%;background:oklch(0.72 0.19 25);border-radius:4px"></div></div>
+<div style="font:700 11px JetBrains Mono;color:oklch(0.72 0.19 25)">94%</div>
+</div>
+<div style="margin-top:11px;font:11.5px/1.45 Inter;color:#e8d9d9">4 of 4 AI models rated this <b>false</b> — Vijay is not the CM of Tamil Nadu. Posting it would spread a known rumour to everyone who follows you.</div>
+<div style="margin-top:14px;display:flex;gap:9px">
+<div onClick="{{ seeShareFacts }}" style="flex:1;text-align:center;font:700 12px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:11px;padding:11px;cursor:pointer">See the facts</div>
+<div onClick="{{ shareReset }}" style="flex:none;text-align:center;font:600 12px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:11px;padding:11px 15px;cursor:pointer">Don’t post</div>
+</div>
+<div style="margin-top:9px;font:9.5px/1.4 JetBrains Mono;color:#7a828f;text-align:center">Post anyway and DisMyth attaches a ⛑ correction label for viewers</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- ACCURACY LEDGER -->
+<sc-if value="{{ isLedger }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="background:#0c0e12">
+<div style="padding:40px 18px 8px;display:flex;align-items:center;gap:12px"><div onClick="{{ goFeed }}" style="font:16px Inter;cursor:pointer;color:#7a828f">←</div><div style="font:700 14px Space Grotesk">Accuracy ledger</div><div style="margin-left:auto;font:9px JetBrains Mono;color:oklch(0.82 0.12 150);background:oklch(0.72 0.15 145 / .12);border:1px solid oklch(0.72 0.15 145 / .3);padding:3px 8px;border-radius:6px">PUBLIC</div></div>
+<div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
+<div style="font:11.5px/1.5 Inter;color:#7a828f;margin-bottom:14px">Everything DisMyth publishes is measured in the open — so anyone, including IFCN assessors, can audit our record.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:oklch(0.72 0.15 145)">{{ medianTime }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">MEDIAN CLAIM → VERDICT</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">{{ accuracy }}%</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">VERDICTS UPHELD ON REVIEW</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:#eef1f6">{{ checked30d }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">CLAIMS CHECKED · 30D</div></div>
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:14px;padding:13px"><div style="font:700 22px Space Grotesk;color:oklch(0.78 0.15 80)">{{ correctionsCount }}</div><div style="font:9.5px JetBrains Mono;color:#5a626f;margin-top:3px">CORRECTIONS ISSUED</div></div>
+</div>
+<div style="margin-top:18px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// CORRECTIONS_LOG</div>
+<div style="margin-top:11px;display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ corrections }}" as="cx" hint-placeholder-count="3">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:13px;padding:13px 14px">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:9px JetBrains Mono;color:oklch(0.82 0.12 150);background:oklch(0.72 0.15 145 / .12);padding:2px 7px;border-radius:5px">CORRECTED</div><div style="font:9.5px JetBrains Mono;color:#5a626f">{{ cx.date }}</div></div>
+<div style="margin-top:9px;font:500 12.5px/1.4 Space Grotesk;color:#eef1f6">{{ cx.claim }}</div>
+<div style="margin-top:9px;display:flex;align-items:center;gap:8px;font:10px JetBrains Mono"><span style="color:#7a828f;text-decoration:line-through">{{ cx.was }}</span><span style="color:#5a626f">→</span><span style="color:oklch(0.82 0.12 150)">{{ cx.now }}</span></div>
+<div style="margin-top:9px;font:11px/1.45 Inter;color:#7a828f">{{ cx.reason }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- CHECK FAB + NAV -->
+<sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ openSubmit }}" style="position:absolute;bottom:56px;left:50%;transform:translateX(-50%);z-index:55;width:58px;height:58px;border-radius:50%;background:oklch(0.72 0.15 145);display:grid;place-items:center;box-shadow:0 10px 26px -6px oklch(0.72 0.15 145 / .7);cursor:pointer;border:4px solid #0c0e12"><span style="font:700 24px Inter;color:#04140b;line-height:1">✓</span></div>
+<div style="position:absolute;bottom:0;left:0;right:0;z-index:50;height:74px;background:rgba(12,14,18,.9);backdrop-filter:blur(12px);border-top:1px solid #1c2128;display:flex;align-items:flex-start;padding:12px 22px 0">
+<div onClick="{{ goFeed }}" style="flex:1;text-align:center;cursor:pointer"><div style="font:16px Inter;color:{{ tabFeed }}">▣</div><div style="font:9px JetBrains Mono;color:{{ tabFeed }};margin-top:3px">FEED</div></div>
+<div onClick="{{ goMap }}" style="flex:1;text-align:center;cursor:pointer"><div style="font:16px Inter;color:{{ tabMap }}">◎</div><div style="font:9px JetBrains Mono;color:{{ tabMap }};margin-top:3px">MAP</div></div>
+<div style="width:58px;flex:none"></div>
+<div onClick="{{ goAlerts }}" style="flex:1;text-align:center;cursor:pointer"><div style="font:16px Inter;color:{{ tabAlerts }}">⚑</div><div style="font:9px JetBrains Mono;color:{{ tabAlerts }};margin-top:3px">ALERTS</div></div>
+<div onClick="{{ goAccount }}" style="flex:1;text-align:center;cursor:pointer"><div style="font:16px Inter;color:{{ tabAccount }}">◈</div><div style="font:9px JetBrains Mono;color:{{ tabAccount }};margin-top:3px">PLANS</div></div>
+</div>
+</sc-if>
+
+</div>
+</div>
+<a href="DisMyth Landing.dc.html" style="position:fixed;top:22px;left:22px;z-index:80;display:flex;align-items:center;gap:7px;font:600 12px Inter;color:#8a93a0;background:rgba(18,21,27,.9);border:1px solid #262c34;border-radius:10px;padding:8px 13px" style-hover="color:#fff;border-color:#3a424d"><span style="font-size:14px">←</span>Back to site</a>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 380, &quot;height&quot;: 760},
+  &quot;showExplainers&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Clarity &amp; density&quot;, &quot;label&quot;: &quot;Show \u201cwhat\u2019s this?\u201d helpers&quot;},
+  &quot;explainersOpen&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Clarity &amp; density&quot;, &quot;label&quot;: &quot;Open explainers by default&quot;},
+  &quot;showWeights&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Clarity &amp; density&quot;, &quot;label&quot;: &quot;Show source trust bars&quot;}
+}">
+class Component extends DCLogic {
+  state = {
+    screen: 'onboarding', step: 0,
+    reg: { name: '', contact: '', region: '' },
+    topicsSel: { Health: true, Elections: true, Local: true },
+    notif: { push: true, email: false, sms: true },
+    plan: 'Free',
+    platforms: { x: true, fb: true, ig: true, th: true },
+    published: false, selectedId: null, apiClaim: null, submitText: '"TN CM Vijay to visit Jantar Mantar rally in Delhi to meet the protestors."',
+    attachType: 'text', linkUrl: '', fileName: '', fileIsImage: false, fileUrl: '',
+    disputeReason: '', disputeNote: '', disputeSent: false,
+    shareCaught: false,
+    explain: {},
+  };
+
+  photoRef = React.createRef();
+  videoRef = React.createRef();
+
+  styleFor(v) {
+    const m = { False: { color: 'oklch(0.60 0.21 25)', ink: '#fff' }, Misleading: { color: 'oklch(0.78 0.15 80)', ink: '#1c1400' }, True: { color: 'oklch(0.64 0.15 150)', ink: '#04140b' }, Unverified: { color: 'oklch(0.62 0.03 260)', ink: '#0a0c10' }, Contested: { color: 'oklch(0.74 0.13 60)', ink: '#1c1400' } };
+    const sym = { False: '\u2715', Misleading: '!', True: '\u2713', Unverified: '?', Contested: '\u2696' };
+    return { ...(m[v] || m.Unverified), sym: sym[v] || '?', label: String(v || 'Unverified').toUpperCase() };
+  }
+
+  claims() {
+    return [
+      { id: 'vijay', verdict: 'False', conf: 94, location: 'Tamil Nadu · Delhi', time: '2m ago', claim: '"TN CM Vijay to visit Jantar Mantar rally in Delhi to meet the protestors."', checks: ['Vijay is not the Chief Minister of Tamil Nadu; the incumbent CM is M. K. Stalin (DMK).', 'Vijay leads the TVK party and holds no government office \u2014 the premise is false.', 'No press note, permit or credible report places him at a Jantar Mantar rally.'], origin: 'Traced to unverified forwarded posts \u00b7 spreading in Tamil Nadu & Delhi \u00b7 4.2k shares', evidence: ['eci.gov.in/tn-council-of-ministers', 'pib.gov.in/delhi-rally-permits'], timeline: [ { tag: 'ORIGIN', t: '~14h ago', text: 'First posted as a plain text forward in regional groups, no source cited.' }, { tag: 'MUTATION', t: '~9h ago', text: 'Reworded with a fake official schedule and news-style framing to look credible.' }, { tag: 'SPREAD', t: '2m ago', text: 'Amplified on X and Facebook across Tamil Nadu and Delhi \u2014 4.2k shares.' } ], whatChanges: 'An official ECI record naming Vijay as CM, or a verified permit placing him at the rally, would change this.' },
+      { id: 'chandra', verdict: 'True', conf: 98, location: 'National', time: '1h ago', claim: '"Chandrayaan-3\'s lander touched down near the Moon\'s south pole in August 2023."', checks: ['Confirmed by official mission telemetry and press releases.', 'Corroborated across 9 independent international sources.'], origin: 'Widely reported by verified outlets \u00b7 no manipulation detected', evidence: ['isro.gov.in/chandrayaan-3', 'nasa.gov/lunar-landing-log'], timeline: [ { tag: 'ORIGIN', t: 'Aug 2023', text: 'Announced live via the official ISRO mission broadcast.' }, { tag: 'VERIFIED', t: '1h ago', text: 'Re-shared accurately; corroborated by 9 independent international outlets.' } ], whatChanges: 'A formal retraction from ISRO or NASA telemetry \u2014 none exists.' },
+      { id: 'chennai', verdict: 'Misleading', conf: 88, location: 'Chennai, Tamil Nadu', time: '18m ago', claim: '"Viral video shows Chennai streets flooded this week."', checks: ['Footage is authentic but from the 2015 Chennai floods, not this week.', 'Reverse image + frame match confirms the original upload date.'], origin: 'Re-surfacing in Chennai \u00b7 flagged to 12.4k local users', evidence: ['reverse-search/frame-match', 'imd.gov.in/chennai-rainfall'], timeline: [ { tag: 'ORIGIN', t: 'Dec 2015', text: 'Footage originally filmed during the 2015 Chennai floods.' }, { tag: 'MUTATION', t: '~2d ago', text: 'Re-uploaded with a caption implying it is from this week.' }, { tag: 'SPREAD', t: '18m ago', text: 'Circulating among 12.4k Chennai users as current footage.' } ], whatChanges: 'Metadata or a credible outlet confirming the footage is from this week would move this toward True.', forensics: { headline: 'Authentic footage, wrong date', tag: 'RECONTEXTUALIZED', color: 'oklch(0.78 0.15 80)', signals: [ { label: 'AI-generated likelihood', pct: 4 }, { label: 'Digital manipulation', pct: 6 }, { label: 'Reused / out-of-context', pct: 96 } ], note: 'Frames match a 2015 upload. No pixel edits detected, but the clip is presented as current.' } },
+      { id: 'note', verdict: 'False', conf: 92, location: 'National', time: '3h ago', claim: '"RBI has released a new \u20b91000 note effective this month."', checks: ['No such notification exists on the central bank\'s official channels.', 'Image is a digitally edited version of an older note.'], origin: 'Circulating via messaging forwards \u00b7 6.8k shares', evidence: ['rbi.org.in/press-releases', 'reverse-search/note-image'], timeline: [ { tag: 'ORIGIN', t: '~1d ago', text: 'An edited image of an older note posted as an RBI release.' }, { tag: 'SPREAD', t: '3h ago', text: 'Forwarded widely via messaging apps \u2014 6.8k shares.' } ], whatChanges: 'An official RBI press release announcing the note would change this.', forensics: { headline: 'Digitally manipulated image', tag: 'FORGED', color: 'oklch(0.60 0.21 25)', signals: [ { label: 'AI-generated likelihood', pct: 22 }, { label: 'Digital manipulation', pct: 88 }, { label: 'Reused / out-of-context', pct: 41 } ], note: 'Clone and edit artifacts around the denomination; based on an older genuine note.' } },
+      { id: 'laptop', verdict: 'Unverified', conf: 61, location: 'Tamil Nadu', time: '5h ago', claim: '"Govt to give free laptops to every student who registers by Friday."', checks: ['No official scheme or registration portal has been confirmed.', 'Linked "registration" site requests personal data \u2014 likely a scam.'], origin: 'Spreading via SMS + social forwards \u00b7 under review', evidence: ['tn.gov.in/schemes', 'cybercrime.gov.in/advisories'], timeline: [ { tag: 'ORIGIN', t: '~8h ago', text: 'Appeared as an SMS and social forward with a registration link.' }, { tag: 'MUTATION', t: '~5h ago', text: 'Link swapped to a data-harvesting form mimicking a government portal.' }, { tag: 'SPREAD', t: 'under review', text: 'Spreading in Tamil Nadu; verdict held pending official confirmation.' } ], whatChanges: 'An official tn.gov.in scheme page or government confirmation would move this toward True.' },
+    ];
+  }
+
+  hash(s) { let h = 2166136261; s = String(s || ''); for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 16777619); } return h >>> 0; }
+  rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  ensemble(verdict, conf, seed) {
+    const rnd = this.rng(seed);
+    const others = ['GPT-4o', 'Grok', 'Gemini'];
+    const models = [{ name: 'Claude', live: true, verdict, conf }];
+    const dis = verdict === 'Unverified' ? 0.5 : (conf < 70 ? 0.4 : 0.16);
+    const alt = { False: 'Misleading', Misleading: 'False', True: 'Misleading', Unverified: 'False' };
+    others.forEach(n => { let v = verdict, c = Math.round(conf + (rnd() * 16 - 8)); if (rnd() < dis) { v = alt[verdict] || 'Unverified'; c = Math.round(45 + rnd() * 25); } c = Math.max(32, Math.min(98, c)); models.push({ name: n, live: false, verdict: v, conf: c }); });
+    const counts = {}; models.forEach(m => counts[m.verdict] = (counts[m.verdict] || 0) + 1);
+    let best = verdict, bestN = 0; Object.keys(counts).forEach(k => { if (counts[k] > bestN) { bestN = counts[k]; best = k; } });
+    const agreement = Math.round(bestN / models.length * 100);
+    const avg = Math.round(models.reduce((s, m) => s + m.conf, 0) / models.length);
+    const contested = bestN <= models.length / 2 || agreement < 60;
+    return { models, consensusVerdict: best, agreement, agreeCount: bestN, total: models.length, avg, contested };
+  }
+  typeFor(u) { u = String(u || '').toLowerCase(); if (/reverse|frame|forensic|vision|tineye/.test(u)) return 'Forensic'; if (/who\.|cochrane|isro|nasa|imd|nih|ncbi|science/.test(u)) return 'Scientific'; if (/gov\.|eci|rbi|pib|cybercrime|\.gov/.test(u)) return 'Official'; if (/wiki/.test(u)) return 'Encyclopedic'; return 'News'; }
+  evWeight(t) { return { Official: 95, Government: 95, Scientific: 90, Forensic: 86, Encyclopedic: 74, News: 78 }[t] || 66; }
+  typeColor(t) { return { Official: 'oklch(0.72 0.15 145)', Government: 'oklch(0.72 0.15 145)', Scientific: 'oklch(0.70 0.12 220)', Forensic: 'oklch(0.68 0.13 300)', Encyclopedic: 'oklch(0.72 0.10 200)', News: 'oklch(0.70 0.05 250)' }[t] || '#7a828f'; }
+  biasPos(l) { const m = { 'Left': 10, 'Center-left': 30, 'Center': 50, 'Centre': 50, 'Center-right': 70, 'Right': 90, 'N/A': 50 }; return m[l] != null ? m[l] : 50; }
+  normEvidence(ev) { return (ev || []).slice(0, 5).map(e => { if (typeof e === 'string') { const t = this.typeFor(e); return { source: e, type: t, weight: this.evWeight(t) }; } const t = e.type || this.typeFor(e.source); return { source: e.source || String(e), type: t, weight: e.weight || this.evWeight(t) }; }); }
+  decorate(c) {
+    const conf = Math.max(0, Math.min(100, Math.round(c.conf ?? c.confidence ?? 0)));
+    const ens = this.ensemble(c.verdict, conf, this.hash(c.claim || c.id || ''));
+    const head = ens.contested ? 'Contested' : ens.consensusVerdict;
+    const st = this.styleFor(head);
+    const dispConf = ens.contested ? ens.agreement : ens.avg;
+    const checks = (c.checks || []).slice(0, 4).map((t, i) => ({ n: String(i + 1).padStart(2, '0'), text: t }));
+    const evidence = this.normEvidence(c.evidence).map(e => { const isUrl = /^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(e.source); return { ...e, w: e.weight + '%', typeColor: this.typeColor(e.type), href: isUrl ? 'https://' + e.source : 'https://www.google.com/search?q=' + encodeURIComponent(e.source) }; });
+    const models = ens.models.map(m => { const ms = this.styleFor(m.verdict); return { name: m.name, live: m.live, dot: ms.color, vlabel: ms.label, conf: m.conf, liveTag: m.live ? 'LIVE' : 'SIM' }; });
+    const bias = c.bias || { leaning: 'N/A', note: 'No strong political framing detected.' };
+    const muted = (!bias.leaning || bias.leaning === 'N/A');
+    const tagDot = t => ({ ORIGIN: '#6a7280', MUTATION: 'oklch(0.78 0.15 80)', SPREAD: 'oklch(0.60 0.21 25)', PEAK: 'oklch(0.60 0.21 25)', VERIFIED: 'oklch(0.64 0.15 150)' }[t] || '#6a7280');
+    const sigColor = l => /ai[- ]?gen|synthetic/i.test(l) ? 'oklch(0.68 0.13 300)' : /manip|edit|forg/i.test(l) ? 'oklch(0.60 0.21 25)' : /reuse|context/i.test(l) ? 'oklch(0.78 0.15 80)' : 'oklch(0.70 0.12 220)';
+    const defTimeline = [{ tag: 'ORIGIN', t: 'earlier', text: c.origin || 'Origin not yet traced.' }, { tag: 'SPREAD', t: 'now', text: 'Currently circulating; the spread trace refines as more signals arrive.' }];
+    const timeline = (c.timeline || defTimeline).map(x => ({ ...x, dot: tagDot(x.tag) }));
+    const whatChanges = c.whatChanges || 'New primary-source evidence, or an official statement on this claim, would prompt an automatic re-check.';
+    const fx = c.forensics ? { ...c.forensics, signals: (c.forensics.signals || []).map(s => ({ label: s.label, val: s.pct + '%', w: s.pct + '%', color: sigColor(s.label) })) } : null;
+    const spr = ens.contested ? 22 : Math.round((100 - ens.agreement) / 4 + (100 - dispConf) / 6);
+    const blo = Math.max(0, dispConf - spr), bhi = Math.min(100, dispConf + spr);
+    const band = { lo: blo, hi: bhi, span: bhi - blo };
+    return { ...c, ...st, verdict: c.verdict, headVerdict: head, conf: dispConf, bar: dispConf + '%', checks, evidence, sourceCount: evidence.length, origin: c.origin || '\u2014',
+      models, agreement: ens.agreement, agreeText: ens.agreeCount + ' of ' + ens.total + ' AIs agree', contested: ens.contested,
+      agreeBarColor: ens.contested ? 'oklch(0.74 0.13 60)' : 'oklch(0.72 0.15 145)',
+      bias: { leaning: bias.leaning || 'N/A', note: bias.note || '\u2014', pos: this.biasPos(bias.leaning) + '%', muted },
+      timeline, whatChanges, hasForensics: !!fx, forensics: fx, band };
+  }
+
+  go(screen) { this.setState({ screen, published: false }); }
+  openVerdict(id) { this.setState({ screen: 'verdict', selectedId: id, apiClaim: null }); }
+  togglePlat(k) { this.setState(s => ({ platforms: { ...s.platforms, [k]: !s.platforms[k] } })); }
+  pickLink() { this.setState(s => ({ attachType: s.attachType === 'link' ? 'text' : 'link' })); }
+  pickPhoto() { this.setState({ attachType: 'photo' }); setTimeout(() => { if (this.photoRef.current) this.photoRef.current.click(); }, 0); }
+  pickVideo() { this.setState({ attachType: 'video' }); setTimeout(() => { if (this.videoRef.current) this.videoRef.current.click(); }, 0); }
+  onPhoto(e) { const f = e.target.files && e.target.files[0]; if (!f) return; this.setState({ attachType: 'photo', fileName: f.name, fileIsImage: true, fileUrl: URL.createObjectURL(f) }); }
+  onVideo(e) { const f = e.target.files && e.target.files[0]; if (!f) return; this.setState({ attachType: 'video', fileName: f.name, fileIsImage: false, fileUrl: '' }); }
+  clearFile() { this.setState({ fileName: '', fileUrl: '', fileIsImage: false, attachType: 'text' }); }
+  set(path, v) { this.setState(s => ({ reg: { ...s.reg, [path]: v } })); }
+  toggleTopic(t) { this.setState(s => ({ topicsSel: { ...s.topicsSel, [t]: !s.topicsSel[t] } })); }
+  toggleNotif(k) { this.setState(s => ({ notif: { ...s.notif, [k]: !s.notif[k] } })); }
+  exOpen(k) { const v = this.state.explain[k]; return v == null ? !!(this.props && this.props.explainersOpen) : v; }
+  toggleExplain(k) { const nv = !this.exOpen(k); this.setState(s => ({ explain: { ...s.explain, [k]: nv } })); }
+
+  obNext() { if (this.state.step >= 4) { this.setState({ screen: 'feed' }); } else { this.setState(s => ({ step: s.step + 1 })); } }
+  obBack() { this.setState(s => ({ step: Math.max(0, s.step - 1) })); }
+
+  async runCheck() {
+    const S = this.state;
+    const claim = (S.submitText || '').trim();
+    const at = S.attachType;
+    let content = claim, hasInput = !!claim;
+    if (at === 'link') { hasInput = !!(S.linkUrl || claim); content = 'The user submitted a LINK to fact-check. URL: ' + (S.linkUrl || '(none)') + '. Stated claim/caption: ' + (claim || '(none)') + '. Assess the underlying claim.'; }
+    else if (at === 'photo') { hasInput = !!(S.fileName || claim); content = 'The user submitted a PHOTO ("' + (S.fileName || 'image') + '") to fact-check. Stated claim/caption: ' + (claim || '(none)') + '. You cannot see the image; assess the stated claim, and if the verdict depends on unseen image content return Unverified and note that reverse-image forensics is required.'; }
+    else if (at === 'video') { hasInput = !!(S.fileName || claim); content = 'The user submitted a VIDEO ("' + (S.fileName || 'video') + '") to fact-check. Stated claim/caption: ' + (claim || '(none)') + '. You cannot watch the video; assess the stated claim, and if the verdict depends on unseen footage return Unverified and note that video forensics is required.'; }
+    if (!hasInput) return;
+    if (!window.claude || !window.claude.complete) {
+      this.setState({ screen: 'checking' });
+      setTimeout(() => this.setState({ apiClaim: { verdict: 'Unverified', confidence: 0, claim: claim || 'Submitted item', checks: ['This public build runs the DisMyth interface only. Connect the verification API (see the backend brief) to return live multi-model verdicts here.'], origin: 'Demo build \u2014 no verification backend connected yet', evidence: [] }, selectedId: 'api', screen: 'verdict' }), 900);
+      return;
+    }
+    this.setState({ screen: 'checking' });
+    const SYS = 'You are DisMyth, a neutral, non-partisan fact-checking engine. Assess the user\'s claim using general knowledge. Respond with ONLY minified JSON, no markdown, no prose, exactly this shape: {"verdict":"True|False|Misleading|Unverified","confidence":<integer 0-100>,"claim":"<cleaned claim>","checks":["<2-3 short evidence-based reasoning steps>"],"origin":"<one short line on likely context or spread>","evidence":[{"source":"<domain or path, no https prefix>","type":"Official|Government|Scientific|News|Forensic|Encyclopedic"}],"bias":{"leaning":"Left|Center-left|Center|Center-right|Right|N/A","note":"<one short line on political framing, or none detected>"}}. Provide 2-3 evidence items. If you cannot verify, use "Unverified". Keep every string concise.';
+    try {
+      const raw = await window.claude.complete({ system: SYS, max_tokens: 700, messages: [{ role: 'user', content: content }] });
+      let t = String(raw).trim();
+      const m = t.match(/\{[\s\S]*\}/);
+      if (m) t = m[0];
+      const j = JSON.parse(t);
+      this.setState({ apiClaim: j, selectedId: 'api', screen: 'verdict' });
+    } catch (e) {
+      this.setState({ apiClaim: { verdict: 'Unverified', confidence: 40, claim, checks: ['The automated check could not complete just now. Please try again in a moment.'], origin: 'Network or parsing issue', evidence: [] }, selectedId: 'api', screen: 'verdict' });
+    }
+  }
+
+  renderVals() {
+    const S = this.state;
+    const list = this.claims();
+    const showExplainers = this.props.showExplainers ?? true;
+    const showWeights = this.props.showWeights ?? true;
+    const sel = this.decorate(S.selectedId === 'api' && S.apiClaim ? S.apiClaim : (list.find(c => c.id === S.selectedId) || list[0]));
+    if (S.selectedId === 'api' && (S.attachType === 'photo' || S.attachType === 'video') && !sel.hasForensics) {
+      sel.hasForensics = true;
+      sel.forensics = { headline: 'Forensics required', tag: 'PENDING', color: 'oklch(0.70 0.08 250)', signals: [], note: 'In production, reverse-image and frame-level forensics run automatically on any uploaded ' + S.attachType + '. This verdict assessed the stated claim text only.' };
+    }
+    const on = k => S.platforms[k] ? 'oklch(0.72 0.15 145)' : '#262c34';
+    const platMeta = [{ k: 'x', name: 'X (Twitter)', handle: '@dismyth', glyph: 'X' }, { k: 'fb', name: 'Facebook', handle: '/dismyth', glyph: 'f' }, { k: 'ig', name: 'Instagram', handle: '@dismyth', glyph: '\u25c9' }, { k: 'th', name: 'Threads', handle: '@dismyth', glyph: '@' }];
+    const platforms = platMeta.map(p => ({ name: p.name, handle: p.handle, glyph: p.glyph, toggle: () => this.togglePlat(p.k), track: on(p.k), border: S.platforms[p.k] ? 'oklch(0.72 0.15 145 / .5)' : '#262c34', knob: S.platforms[p.k] ? '19px' : '2px' }));
+    const activeGlyphs = platMeta.filter(p => S.platforms[p.k]).map(p => p.glyph);
+
+    const nav = ['feed', 'map', 'alerts', 'account'];
+    const tab = n => S.screen === n ? '#e8ecf2' : '#5a626f';
+
+    const topicList = ['Health', 'Politics', 'Elections', 'Finance', 'Science', 'Local', 'Disasters', 'Sports'];
+    const topics = topicList.map(l => { const onT = !!S.topicsSel[l]; return { label: l, toggle: () => this.toggleTopic(l), col: onT ? '#04140b' : '#c4ccd6', bg: onT ? 'oklch(0.72 0.15 145)' : '#12151b', brd: onT ? 'oklch(0.72 0.15 145)' : '#262c34' }; });
+    const notifMeta = [{ k: 'push', label: 'Push notifications', sub: 'Instant on your phone' }, { k: 'email', label: 'Email digest', sub: 'Daily summary' }, { k: 'sms', label: 'SMS alerts', sub: 'Critical claims only' }];
+    const notifs = notifMeta.map(n => ({ label: n.label, sub: n.sub, toggle: () => this.toggleNotif(n.k), track: S.notif[n.k] ? 'oklch(0.72 0.15 145)' : '#262c34', knob: S.notif[n.k] ? '19px' : '2px', brd: S.notif[n.k] ? 'oklch(0.72 0.15 145 / .45)' : '#262c34' }));
+    const planMeta = [{ k: 'Free', name: 'Free', price: '₹0', tag: 'Check claims, feed, map & alerts', nc: '#e8ecf2' }, { k: 'DisMyth+', name: 'DisMyth+', price: '₹149/mo', tag: 'Custom geo-alerts & priority checking', nc: 'oklch(0.78 0.09 220)' }, { k: 'Pro', name: 'Pro · Newsroom', price: '₹4,999/mo', tag: 'Auto-post, monitoring & API', nc: 'oklch(0.82 0.12 150)' }];
+    const planPicks = planMeta.map(p => ({ name: p.name, price: p.price, tag: p.tag, name_col: p.nc, pick: () => this.setState({ plan: p.k }), brd: S.plan === p.k ? 'oklch(0.72 0.15 145)' : '#262c34' }));
+
+    const stepTitles = ['Create account', 'Your region', 'Your interests', 'Alerts', 'Choose a plan'];
+    const stepDots = [0, 1, 2, 3, 4].map(i => i <= S.step ? 'oklch(0.72 0.15 145)' : '#262c34');
+
+    const sw = (v, c) => v ? { track: c || 'oklch(0.72 0.15 145)', knob: '19px' } : { track: '#262c34', knob: '2px' };
+    const savedTopics = [
+      { name: 'Election misinformation', region: 'Tamil Nadu', hits: '14 checks this week', ...sw(true) },
+      { name: 'Vaccine & health rumors', region: 'India', hits: '8 checks this week', ...sw(true) },
+      { name: 'Flood / disaster media', region: 'Chennai', hits: '3 checks this week', ...sw(true) },
+      { name: 'Currency & banking', region: 'National', hits: 'paused', ...sw(false) },
+    ];
+    const alertRules = [
+      { name: 'Anything false in my city', tags: ['◎ Chennai', 'Push', 'Instant'], ...sw(true) },
+      { name: 'Election claims, statewide', tags: ['◎ Tamil Nadu', 'Push + SMS'], ...sw(true) },
+      { name: 'Health myths, nationwide', tags: ['◎ India', 'Email digest'], ...sw(false) },
+    ];
+    const trending = [
+      { label: 'CM Vijay rally claim', val: '4.2k', w: '92%', color: 'oklch(0.60 0.21 25)' },
+      { label: 'Old Chennai flood video', val: '3.1k', w: '68%', color: 'oklch(0.78 0.15 80)' },
+      { label: 'Fake ₹1000 note', val: '2.4k', w: '52%', color: 'oklch(0.60 0.21 25)' },
+      { label: 'Free laptop scheme', val: '1.2k', w: '30%', color: 'oklch(0.62 0.03 260)' },
+    ];
+    const team = [
+      { ini: 'RW', name: 'Rehan Imam Waris', email: 'rehan@dismyth.app', role: 'Owner' },
+      { ini: 'PA', name: 'Priya Anand', email: 'priya@dismyth.app', role: 'Editor' },
+      { ini: 'MK', name: 'Mohammed Khan', email: 'khan@dismyth.app', role: 'Analyst' },
+    ];
+    const yes = 'oklch(0.72 0.15 145)', no = '#3a424d', dash = '#5a626f';
+    const compareRows = [
+      { label: 'Unlimited claim checks', free: '✓', plus: '✓', pro: '✓' },
+      { label: 'Verdict cards & evidence', free: '✓', plus: '✓', pro: '✓' },
+      { label: 'Regional feed & map', free: '✓', plus: '✓', pro: '✓' },
+      { label: 'Custom geo-alerts', free: '—', plus: '✓', pro: '✓' },
+      { label: 'Priority checking', free: '—', plus: '✓', pro: '✓' },
+      { label: 'Auto-post composer', free: '—', plus: '—', pro: '✓' },
+      { label: 'Monitoring dashboard', free: '—', plus: '—', pro: '✓' },
+      { label: 'API + team seats', free: '—', plus: '—', pro: '✓' },
+    ].map(r => ({ ...r, freeC: r.free === '✓' ? yes : dash, plusC: r.plus === '✓' ? yes : dash, proC: r.pro === '✓' ? yes : dash }));
+
+    const radar = [
+      { label: '"EVMs already hacked for 2026 polls"', region: 'Tamil Nadu', vel: '\u25b2 +310%/hr', w: '86%', color: 'oklch(0.60 0.21 25)' },
+      { label: 'AI voice clip of a minister "resigning"', region: 'National', vel: '\u25b2 +190%/hr', w: '64%', color: 'oklch(0.78 0.15 80)' },
+      { label: '"Banks shut for 5 days" forward', region: 'Chennai', vel: '\u25b2 +95%/hr', w: '42%', color: 'oklch(0.78 0.15 80)' },
+    ];
+    const corrections = [
+      { date: '22 Jul 2026', claim: '"New metro line opens Monday in Chennai."', was: 'TRUE', now: 'MISLEADING', reason: 'Opening was delayed after the initial official announcement; verdict updated when the revised notice was published.' },
+      { date: '19 Jul 2026', claim: '"Viral cyclone image from the Bay of Bengal."', was: 'UNVERIFIED', now: 'FALSE', reason: 'Reverse-image forensics later matched a 2019 typhoon photo from a different region.' },
+      { date: '15 Jul 2026', claim: '"State to waive all farm loans this quarter."', was: 'FALSE', now: 'MISLEADING', reason: 'A partial waiver scheme was in fact announced; verdict corrected after human review of a dispute.' },
+    ];
+    return {
+      showExplainers, showWeights,
+      exSources: showExplainers && this.exOpen('sources'),
+      exOrigin: showExplainers && this.exOpen('origin'),
+      exBias: showExplainers && this.exOpen('bias'),
+      toggleSources: () => this.toggleExplain('sources'),
+      toggleOrigin: () => this.toggleExplain('origin'),
+      toggleBias: () => this.toggleExplain('bias'),
+      sourcesHelp: 'These are the records we checked the claim against. Each is weighted by how authoritative it is — official government and scientific records count more than news or social posts. Tap any source to open it.',
+      originHelp: 'The life story of this claim: where it first appeared (ORIGIN), how the wording was later changed to look convincing (MUTATION), and how far it then spread (SPREAD). Oldest is at the top, newest at the bottom.',
+      biasHelp: 'Which political side the claim\u2019s wording leans toward — left, centre or right. It flags spin in how the claim is framed. This rates the claim itself, not DisMyth\u2019s verdict, which stays neutral.',
+      isShare: S.screen === 'share', isLedger: S.screen === 'ledger',
+      goShare: () => this.setState({ screen: 'share', shareCaught: false }), goLedger: () => this.go('ledger'),
+      shareCaught: S.shareCaught, shareTryPost: () => this.setState({ shareCaught: true }), shareReset: () => this.setState({ shareCaught: false }), seeShareFacts: () => this.openVerdict('vijay'),
+      radar, corrections, accuracy: '96.4', medianTime: '8m', checked30d: '128,540', correctionsCount: '37',
+      isOnboard: S.screen === 'onboarding', isFeed: S.screen === 'feed', isMap: S.screen === 'map', isAlerts: S.screen === 'alerts', isAccount: S.screen === 'account', isSubmit: S.screen === 'submit', isChecking: S.screen === 'checking', isVerdict: S.screen === 'verdict', isCompose: S.screen === 'compose', isCompare: S.screen === 'compare', isTopicsMgr: S.screen === 'topics', isAlertRules: S.screen === 'alertrules', isMonitor: S.screen === 'monitor', isTeam: S.screen === 'team',
+      showNav: nav.includes(S.screen),
+      region: (S.reg.region && S.reg.region.split(',')[0]) || 'Tamil Nadu',
+      feed: list.map(c => { const d = this.decorate(c); return { ...d, open: () => this.openVerdict(c.id) }; }),
+      sel, selApi: S.selectedId === 'api',
+      platforms, activeGlyphs, activeCount: activeGlyphs.length,
+      published: S.published, notPublished: !S.published,
+      postText: 'FACT CHECK \u2014 ' + sel.claim + ' Verdict: ' + sel.label + ' (' + sel.conf + '% confidence). Full evidence on DisMyth. #DisMyth #DismissTheLie',
+      submitText: S.submitText, onSubmitText: e => this.setState({ submitText: e.target.value }),
+      pickLink: () => this.pickLink(), pickPhoto: () => this.pickPhoto(), pickVideo: () => this.pickVideo(),
+      onPhoto: e => this.onPhoto(e), onVideo: e => this.onVideo(e), clearFile: () => this.clearFile(),
+      onLink: e => this.setState({ linkUrl: e.target.value }), linkUrl: S.linkUrl,
+      photoRef: this.photoRef, videoRef: this.videoRef,
+      pickHint: { text: 'Paste or type the exact claim you want checked — a sentence, a rumour, or a forwarded message.', link: '🔗 Paste the URL of the post, tweet or article. We open it, read the claim inside, and trace where it spread.', photo: '🖼 Upload a screenshot or image. We run reverse-image forensics to spot edits, AI-generation and old photos reused as new.', video: '🎬 Upload the clip. We check it frame-by-frame for manipulation and whether old footage is being passed off as current.' }[S.attachType] || '',
+      isLink: S.attachType === 'link', hasFile: !!S.fileName, fileName: S.fileName,
+      fileThumb: (S.fileIsImage && S.fileUrl) ? ('url(' + S.fileUrl + ')') : 'none',
+      fileIcon: S.fileIsImage ? '' : (S.attachType === 'video' ? '\ud83c\udfac' : '\ud83d\uddbc'),
+      tLinkC: S.attachType === 'link' ? '#04140b' : '#c4ccd6', tLinkB: S.attachType === 'link' ? 'oklch(0.72 0.15 145)' : '#12151b', tLinkBr: S.attachType === 'link' ? 'oklch(0.72 0.15 145)' : '#262c34',
+      tPhotoC: S.attachType === 'photo' ? '#04140b' : '#c4ccd6', tPhotoB: S.attachType === 'photo' ? 'oklch(0.72 0.15 145)' : '#12151b', tPhotoBr: S.attachType === 'photo' ? 'oklch(0.72 0.15 145)' : '#262c34',
+      tVideoC: S.attachType === 'video' ? '#04140b' : '#c4ccd6', tVideoB: S.attachType === 'video' ? 'oklch(0.72 0.15 145)' : '#12151b', tVideoBr: S.attachType === 'video' ? 'oklch(0.72 0.15 145)' : '#262c34',
+      regName: S.reg.name, regContact: S.reg.contact, regRegion: S.reg.region,
+      onName: e => this.set('name', e.target.value), onContact: e => this.set('contact', e.target.value), onRegion: e => this.set('region', e.target.value),
+      topics, notifs, planPicks,
+      stepDots, stepNo: S.step + 1, stepTitle: stepTitles[S.step],
+      isS0: S.step === 0, isS1: S.step === 1, isS2: S.step === 2, isS3: S.step === 3, isS4: S.step === 4,
+      canBack: S.step > 0, obNextLabel: S.step >= 4 ? 'Create account →' : 'Continue →',
+      obNext: () => this.obNext(), obBack: () => this.obBack(),
+      savedTopics, alertRules, trending, team, compareRows,
+      goFeed: () => this.go('feed'), goMap: () => this.go('map'), goAlerts: () => this.go('alerts'), goAccount: () => this.go('account'),
+      goCompare: () => this.go('compare'), goTopics: () => this.go('topics'), goAlertRules: () => this.go('alertrules'), goMonitor: () => this.go('monitor'), goTeam: () => this.go('team'),
+      isDispute: S.screen === 'dispute', openDispute: () => this.setState({ screen: 'dispute', disputeSent: false }),
+      disputeReasons: ['Verdict looks wrong', 'Missing context', 'Out of date', 'Source unreliable', 'Other'].map(r => ({ label: r, pick: () => this.setState({ disputeReason: r }), col: S.disputeReason === r ? '#04140b' : '#c4ccd6', bg: S.disputeReason === r ? 'oklch(0.72 0.15 145)' : '#12151b', brd: S.disputeReason === r ? 'oklch(0.72 0.15 145)' : '#262c34' })),
+      disputeNote: S.disputeNote, onDisputeNote: e => this.setState({ disputeNote: e.target.value }),
+      submitDispute: () => this.setState({ disputeSent: true }), disputeSent: S.disputeSent, notDisputeSent: !S.disputeSent,
+      caseId: (this.hash((sel && sel.claim) || 'x') % 90000 + 10000),
+      openSubmit: () => this.setState({ screen: 'submit' }), runCheck: () => this.runCheck(),
+      openCompose: () => this.setState({ screen: 'compose', published: false }), openVerdictBack: () => this.setState({ screen: 'verdict' }), publish: () => this.setState({ published: true }),
+      tabFeed: tab('feed'), tabMap: tab('map'), tabAlerts: tab('alerts'), tabAccount: tab('account'),
+    };
+  }
+}
+</script>
+</body>
+</html>

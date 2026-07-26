@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+doc-page:not(:defined){visibility:hidden}
+body{margin:0}
+.dmh{font-family:Space Grotesk,sans-serif;color:#0f1115;line-height:1.2}
+h1.dmh{font-size:30px;font-weight:700;letter-spacing:-.6px;margin:0 0 4px}
+h2.dmh{font-size:18px;font-weight:600;margin:30px 0 10px;padding-top:14px;border-top:2px solid #0f1115;letter-spacing:-.2px}
+h3.dmh{font-size:13.5px;font-weight:600;margin:18px 0 6px;color:#0f1115}
+p.dmb,li.dmb{font-family:Inter,sans-serif;font-size:11.5px;line-height:1.6;color:#2a2f37}
+.mono{font-family:JetBrains Mono,monospace}
+.tag{font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase}
+.card{border:1px solid #d7dce3;border-radius:10px;padding:13px 15px;margin:9px 0;break-inside:avoid}
+.ep{font-family:JetBrains Mono,monospace;font-size:11px;background:#0f1115;color:#e8ecf2;border-radius:7px;padding:9px 12px;margin:7px 0;break-inside:avoid}
+.ep b{color:oklch(0.82 0.14 150)}
+.mut{color:#6b7280}
+</style>
+<script src="./doc-page.js"></script>
+</helmet>
+<doc-page margin="0.7in">
+<div slot="header" style="display:flex;justify-content:space-between;align-items:center;font-family:JetBrains Mono,monospace;font-size:8.5px;letter-spacing:1px;color:#8a93a0;text-transform:uppercase;padding-bottom:4px">
+<span>DisMyth — Backend Developer Brief</span><span>Dismiss the lie · v1</span>
+</div>
+<div slot="footer" style="font-family:JetBrains Mono,monospace;font-size:8px;letter-spacing:.5px;color:#9aa3b0;text-align:center;padding-top:4px">Confidential — for engineering handoff · dismyth.app · Rehan Imam Waris</div>
+
+<div style="display:inline-block;background:oklch(0.72 0.15 145);color:#04140b;font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;padding:4px 9px;border-radius:5px;text-transform:uppercase">Engineering Handoff</div>
+<h1 class="dmh" style="margin-top:12px">DisMyth — Backend Build Brief</h1>
+<p class="dmb" style="max-width:560px">This document specifies the backend a developer needs to turn the existing DisMyth prototype into a live product on <b>dismyth.app</b>. The frontend (landing, app, methodology) is built and deployable today; everything below is the server-side work that makes verdicts, accounts, and publishing real.</p>
+
+<h2 class="dmh">1 · What already exists</h2>
+<p class="dmb"><b>Frontend, done:</b> full mobile app UI (onboarding, feed, spread map, alerts, plans), the verdict experience (multi-AI consensus, confidence range, evidence, origin &amp; mutation timeline, media forensics, neutrality meter), share-check interception, dispute/human-review flow, accuracy ledger, and a public landing + methodology site. All screens are static, editable HTML and host as-is on any static CDN.</p>
+<p class="dmb"><b>Not real yet:</b> live claim verification (the demo call only runs inside the design tool), the regional feed/map/ledger data, authentication, billing, and social auto-posting. These are the four backend layers scoped here.</p>
+
+<h2 class="dmh">2 · System architecture</h2>
+<div class="card">
+<p class="dmb" style="margin:0"><b>Frontend</b> — static site (current HTML) on Vercel / Netlify / Cloudflare Pages, served at dismyth.app. Talks to the API over HTTPS/JSON.</p>
+</div>
+<div class="card">
+<p class="dmb" style="margin:0"><b>API service</b> — stateless HTTP API (Node/TypeScript or Python/FastAPI). Handles claims, accounts, billing, publishing. Deploy on Fly.io / Render / AWS.</p>
+</div>
+<div class="card">
+<p class="dmb" style="margin:0"><b>Verification workers</b> — a job queue (e.g. BullMQ/Redis or SQS) running the multi-model check, retrieval, and forensics asynchronously so the API stays responsive.</p>
+</div>
+<div class="card">
+<p class="dmb" style="margin:0"><b>Data</b> — PostgreSQL (claims, verdicts, users, corrections), Redis (cache + queue), object storage (uploaded images/video), and a vector store (pgvector) for claim de-duplication and matching.</p>
+</div>
+
+<h2 class="dmh">3 · Core API endpoints</h2>
+<div class="ep"><b>POST</b> /v1/checks — submit a claim (text / url / image / video). Returns <span class="mono">{checkId, status:"queued"}</span>.</div>
+<div class="ep"><b>GET</b> /v1/checks/:id — poll verdict; returns the full verdict object (see §5) once <span class="mono">status:"complete"</span>.</div>
+<div class="ep"><b>GET</b> /v1/feed?region=... — regional feed of recent public verdicts.</div>
+<div class="ep"><b>GET</b> /v1/trends?region=... — spread-map hotspots + trend-radar velocities.</div>
+<div class="ep"><b>POST</b> /v1/disputes — escalate a verdict to human review.</div>
+<div class="ep"><b>POST</b> /v1/broadcasts — (Pro) publish a correction to connected social channels.</div>
+<div class="ep"><b>GET</b> /v1/ledger — public accuracy metrics + corrections log.</div>
+<div class="ep"><b>POST</b> /v1/auth/*, /v1/billing/* — accounts, sessions, subscriptions, webhooks.</div>
+
+<h2 class="dmh">4 · The verification pipeline (the core IP)</h2>
+<p class="dmb">This is the heart of DisMyth and where most engineering effort goes. On each <span class="mono">/v1/checks</span> job:</p>
+<ol style="margin:6px 0 0;padding-left:18px">
+<li class="dmb"><b>Normalise input.</b> Text → clean claim string. URL → fetch + extract the article/post text and metadata. Image/video → store to object storage, generate a hash.</li>
+<li class="dmb"><b>De-duplicate.</b> Embed the claim and match against previously-checked claims (pgvector). A near-match returns the cached verdict instantly — this is what makes DisMyth fast and cheap at scale.</li>
+<li class="dmb"><b>Retrieve evidence.</b> Query trusted-source APIs and web search (official/gov, scientific, fact-check databases, reputable news). Rank each source by a credibility weight (Official/Scientific 90–95, Forensic 86, News 78…) — the weights already shown in the UI.</li>
+<li class="dmb"><b>Multi-model consensus.</b> Send claim + retrieved evidence to 3–4 LLMs (Claude, GPT, Grok, Gemini) with a strict JSON schema. Each returns verdict + confidence. Compute agreement %; if models disagree past a threshold, mark <b>Contested</b> and auto-route to human review (never auto-broadcast).</li>
+<li class="dmb"><b>Media forensics</b> (image/video only). Run reverse-image search, AI-generation detection, manipulation/ELA analysis, and frame matching for out-of-context reuse. Produce the three forensic signal scores.</li>
+<li class="dmb"><b>Origin &amp; mutation trace.</b> Use platform search APIs to find earliest appearances and reworded variants; assemble the ORIGIN → MUTATION → SPREAD timeline.</li>
+<li class="dmb"><b>Assemble &amp; persist</b> the verdict object, cache it, and (if public) add to the regional feed.</li>
+</ol>
+<p class="dmb"><b>Prompt contract:</b> the prototype already defines the exact JSON schema the models must return (verdict, confidence, checks, origin, evidence[], bias). Reuse it verbatim — it drives the UI directly.</p>
+
+<h2 class="dmh">5 · Verdict data model</h2>
+<div class="ep" style="line-height:1.7">{<br>
+&nbsp;&nbsp;<b>id</b>, <b>claim</b>, <b>verdict</b>: True|False|Misleading|Unverified|Contested,<br>
+&nbsp;&nbsp;<b>confidence</b>: 0-100, <b>confidenceBand</b>: {lo, hi},<br>
+&nbsp;&nbsp;<b>consensus</b>: {agreement, models:[{name, verdict, confidence}]},<br>
+&nbsp;&nbsp;<b>checks</b>: [string], <b>whatWouldChange</b>: string,<br>
+&nbsp;&nbsp;<b>evidence</b>: [{source, type, weight, url}],<br>
+&nbsp;&nbsp;<b>forensics</b>: {headline, signals:[{label, pct}], note} | null,<br>
+&nbsp;&nbsp;<b>timeline</b>: [{tag, time, text}], <b>bias</b>: {leaning, note},<br>
+&nbsp;&nbsp;<b>region</b>, <b>createdAt</b>, <b>status</b><br>
+}</div>
+<p class="dmb mut" style="margin-top:6px">Every field maps 1:1 to a component already rendered in the app — build the API to this shape and the frontend needs almost no change.</p>
+
+<h2 class="dmh">6 · Third-party services</h2>
+<p class="dmb"><b>LLMs:</b> Anthropic (Claude), OpenAI, xAI (Grok), Google (Gemini) APIs. <b>Retrieval:</b> a web-search API (Brave/Bing/SerpAPI) + fact-check feeds (Google Fact Check Tools API, ClaimReview schema). <b>Forensics:</b> reverse-image (TinEye/Google Vision), an AI-image detector, plus ELA/metadata libs. <b>Social publishing:</b> X API, Meta Graph API (FB/IG/Threads) — <span style="color:oklch(0.5 0.2 25)">start app-review now; approval is slow.</span> <b>Payments:</b> Razorpay (India-first) or Stripe. <b>Infra:</b> Postgres, Redis, S3-compatible storage.</p>
+
+<h2 class="dmh">7 · Accounts, plans &amp; billing</h2>
+<p class="dmb">Email/OAuth auth (Google, Apple). Three tiers already designed: <b>Free</b> (unlimited checks, feed, map), <b>DisMyth+</b> ₹149/mo (geo-alerts, priority, ad-free), <b>Pro</b> ₹4,999/mo (auto-post, monitoring dashboard, API, team seats). Gate features by plan; meter API usage for Pro. Wire billing webhooks to update entitlements.</p>
+
+<h2 class="dmh">8 · Human review &amp; the public ledger</h2>
+<p class="dmb">Contested and disputed claims enter a review queue for senior fact-checkers + vetted community reviewers; a verdict is <b>held from broadcast</b> until resolved. Every published verdict, correction, and its reason is written to the append-only ledger that powers the public accuracy page — this is core to the IFCN signatory goal, so build it as an auditable, immutable log from day one.</p>
+
+<h2 class="dmh">9 · Phased delivery plan</h2>
+<div class="card"><span class="tag" style="color:oklch(0.55 0.16 145)">Phase 1 · week 1</span><p class="dmb" style="margin:5px 0 0"><b>Ship the site.</b> Deploy current frontend to dismyth.app + a waitlist form. No backend needed. (See the deploy guide.)</p></div>
+<div class="card"><span class="tag" style="color:oklch(0.55 0.16 145)">Phase 2 · weeks 2–5</span><p class="dmb" style="margin:5px 0 0"><b>Real single-claim check.</b> <span class="mono">/v1/checks</span> for text + URL, retrieval, multi-model consensus, verdict persistence. This alone is a shippable product.</p></div>
+<div class="card"><span class="tag" style="color:oklch(0.55 0.16 145)">Phase 3 · weeks 6–9</span><p class="dmb" style="margin:5px 0 0"><b>Accounts + billing</b>, de-dup cache, public feed &amp; ledger, dispute queue.</p></div>
+<div class="card"><span class="tag" style="color:oklch(0.55 0.16 145)">Phase 4 · weeks 10+</span><p class="dmb" style="margin:5px 0 0"><b>Media forensics, origin tracing, spread map, and social auto-posting</b> (pending platform approvals) + the browser extension for share-check.</p></div>
+
+<h2 class="dmh">10 · Non-functional notes</h2>
+<p class="dmb"><b>Cost control:</b> the de-dup cache is essential — most viral claims are checked once and served from cache thousands of times. <b>Rate limits &amp; abuse:</b> per-IP and per-account throttling on <span class="mono">/checks</span>. <b>Neutrality:</b> log every model's raw output for auditability; never let a single model's answer publish unreviewed. <b>Privacy:</b> uploaded media is scanned then purged on a retention schedule. <b>Compliance:</b> methodology, corrections policy, and funding must stay public per IFCN principles (already reflected in the methodology page).</p>
+
+<p class="dmb mut" style="margin-top:24px;padding-top:10px;border-top:1px solid #d7dce3">Deliver §4 (pipeline) and §5 (data model) to spec and the existing frontend becomes a live product with minimal rework. Questions on any section → build against the prototype; it is the source of truth for behaviour and shapes.</p>
+</doc-page>
+</x-dc>
+</body>
+</html>
