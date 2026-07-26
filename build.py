@@ -97,7 +97,8 @@ RUNCHECK_NEW = r'''if (!window.claude || !window.claude.complete) {
         const j = await r.json();
         this.setState({ apiClaim: j, selectedId: 'api', screen: 'verdict' });
       } catch (e) {
-        this.setState({ apiClaim: { verdict: 'Unverified', confidence: 0, claim: claim || 'Submitted item', checks: ['Live verification isn\'t connected yet — add your ANTHROPIC_API_KEY on the host and deploy the /api/check function (see DEPLOY-VERIFY.md).'], origin: 'Demo build — no verification backend connected yet', evidence: [] }, selectedId: 'api', screen: 'verdict' });
+        // Honest failure: no fake verdict, no fabricated AI votes, no dev text.
+        this.setState({ screen: 'error', errorMsg: 'We couldn\'t reach the verification service just now. Please check your connection and try again in a moment.' });
       }
       return;
     }'''

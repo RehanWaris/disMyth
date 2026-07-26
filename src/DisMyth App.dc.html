@@ -403,6 +403,17 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 </div>
 </sc-if>
 
+<!-- ERROR (verify could not complete — no fake verdict, no fabricated AI votes) -->
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div class="dm-scr" style="align-items:center;justify-content:center;padding:0 34px;background:#0c0e12">
+<div style="width:56px;height:56px;border-radius:50%;border:2px solid oklch(0.62 0.19 25 / .5);display:flex;align-items:center;justify-content:center;font:700 26px Space Grotesk;color:oklch(0.70 0.19 25)">!</div>
+<div style="margin-top:20px;font:600 16px Space Grotesk;color:#eef1f6;text-align:center">Couldn't complete the check</div>
+<div style="margin-top:10px;font:13px/1.5 Inter;color:#9aa3af;text-align:center;max-width:300px">{{ errorMsg }}</div>
+<div onClick="{{ runCheck }}" style="margin-top:26px;cursor:pointer;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:13px 30px">Try again →</div>
+<div onClick="{{ openSubmit }}" style="margin-top:14px;cursor:pointer;font:600 13px Inter;color:#9aa3af">Back</div>
+</div>
+</sc-if>
+
 <!-- VERDICT -->
 <sc-if value="{{ isVerdict }}" hint-placeholder-val="{{ false }}">
 <div class="dm-scr" style="background:#0c0e12">
@@ -872,7 +883,7 @@ class Component extends DCLogic {
       goShare: () => this.setState({ screen: 'share', shareCaught: false }), goLedger: () => this.go('ledger'),
       shareCaught: S.shareCaught, shareTryPost: () => this.setState({ shareCaught: true }), shareReset: () => this.setState({ shareCaught: false }), seeShareFacts: () => this.openVerdict('vijay'),
       radar, corrections, accuracy: '96.4', medianTime: '8m', checked30d: '128,540', correctionsCount: '37',
-      isOnboard: S.screen === 'onboarding', isFeed: S.screen === 'feed', isMap: S.screen === 'map', isAlerts: S.screen === 'alerts', isAccount: S.screen === 'account', isSubmit: S.screen === 'submit', isChecking: S.screen === 'checking', isVerdict: S.screen === 'verdict', isCompose: S.screen === 'compose', isCompare: S.screen === 'compare', isTopicsMgr: S.screen === 'topics', isAlertRules: S.screen === 'alertrules', isMonitor: S.screen === 'monitor', isTeam: S.screen === 'team',
+      isOnboard: S.screen === 'onboarding', isFeed: S.screen === 'feed', isMap: S.screen === 'map', isAlerts: S.screen === 'alerts', isAccount: S.screen === 'account', isSubmit: S.screen === 'submit', isChecking: S.screen === 'checking', isVerdict: S.screen === 'verdict', isCompose: S.screen === 'compose', isCompare: S.screen === 'compare', isTopicsMgr: S.screen === 'topics', isAlertRules: S.screen === 'alertrules', isMonitor: S.screen === 'monitor', isTeam: S.screen === 'team', isError: S.screen === 'error', errorMsg: S.errorMsg || 'Please check your connection and try again in a moment.',
       showNav: nav.includes(S.screen),
       region: (S.reg.region && S.reg.region.split(',')[0]) || 'Tamil Nadu',
       feed: list.map(c => { const d = this.decorate(c); return { ...d, open: () => this.openVerdict(c.id) }; }),
