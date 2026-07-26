@@ -139,7 +139,9 @@ async function voteGemini(content) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return { status: 'not_connected' };
   try {
-    const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+    // "gemini-flash-latest" is an alias that always tracks Google's current
+    // flash model — avoids 404s when a specific version is retired.
+    const model = process.env.GEMINI_MODEL || 'gemini-flash-latest';
     const url =
       'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
     const r = await fetch(url, {
@@ -148,15 +150,15 @@ async function voteGemini(content) {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: VOTER_PROMPT }] },
         contents: [{ role: 'user', parts: [{ text: content }] }],
-        generationConfig: { maxOutputTokens: 200, responseMimeType: 'application/json' },
+        generationConfig: { maxOutputTokens: 512, responseMimeType: 'application/json' },
       }),
     });
     if (!r.ok) return { status: 'error' };
     const d = await r.json();
-    const t =
-      (d.candidates && d.candidates[0] && d.candidates[0].content &&
-        d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
-        d.candidates[0].content.parts[0].text) || '';
+    // Newer (thinking) models can split the reply across parts — join all text.
+    const parts =
+      (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+    const t = parts.map((p) => p && p.text).filter(Boolean).join('');
     const j = firstJsonObject(t);
     return { verdict: j.verdict, confidence: j.confidence };
   } catch {
