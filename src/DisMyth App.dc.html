@@ -125,6 +125,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div onClick="{{ goShare }}" style="flex:1;display:flex;align-items:center;gap:8px;background:#12151b;border:1px solid #1c2128;border-radius:11px;padding:9px 11px;cursor:pointer"><span style="font:12px;color:oklch(0.72 0.11 220)">↱</span><div style="min-width:0"><div style="font:600 11px Inter;color:#eef1f6">Share-check</div><div style="font:9px JetBrains Mono;color:#5a626f">catch lies before posting</div></div></div>
 </div>
 <div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px">
+<div onClick="{{ openOnboarding }}" style="display:flex;align-items:center;gap:11px;background:#12151b;border:1px solid oklch(0.72 0.15 145 / .35);border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer"><span style="font:16px">◇</span><div style="flex:1"><div style="font:600 13px Space Grotesk;color:#f2f5f9">Personalize your feed</div><div style="font:11px Inter;color:#8a93a0;margin-top:2px">Pick your topics &amp; area to monitor for rumours</div></div><span style="font:600 14px Inter;color:oklch(0.82 0.12 150)">→</span></div>
 <div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px;margin-bottom:10px">// REGIONAL_FEED</div>
 <div style="display:flex;flex-direction:column;gap:11px">
 <sc-for list="{{ feed }}" as="c" hint-placeholder-count="4">
@@ -203,6 +204,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <!-- ACCOUNT / PLANS -->
 <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
 <div class="dm-scr">
+<a href="DisMyth Landing.dc.html" style="display:block;padding:16px 20px 0;font:600 12px Inter;color:#8a93a0">← Back to dismyth.app</a>
 <div style="padding:40px 20px 12px;display:flex;align-items:center;justify-content:space-between"><div><div style="font:700 17px Space Grotesk">Plans</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Free to fight lies. Pay to broadcast truth.</div></div><div onClick="{{ goCompare }}" style="font:11px JetBrains Mono;color:oklch(0.72 0.11 220);cursor:pointer;text-align:right">Compare<br/>all →</div></div>
 <div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px;display:flex;flex-direction:column;gap:12px">
 <div style="background:#12151b;border:1px solid #1c2128;border-radius:16px;padding:16px">
@@ -919,7 +921,7 @@ class Component extends DCLogic {
       disputeNote: S.disputeNote, onDisputeNote: e => this.setState({ disputeNote: e.target.value }),
       submitDispute: () => this.setState({ disputeSent: true }), disputeSent: S.disputeSent, notDisputeSent: !S.disputeSent,
       caseId: (this.hash((sel && sel.claim) || 'x') % 90000 + 10000),
-      openSubmit: () => this.setState({ screen: 'submit' }), runCheck: () => this.runCheck(),
+      openSubmit: () => this.setState({ screen: 'submit' }), runCheck: () => this.runCheck(), openOnboarding: () => this.setState({ screen: 'onboarding', step: 0 }),
       openCompose: () => this.setState({ screen: 'compose', published: false }), openVerdictBack: () => this.setState({ screen: 'verdict' }), publish: () => this.setState({ published: true }),
       tabFeed: tab('feed'), tabMap: tab('map'), tabAlerts: tab('alerts'), tabAccount: tab('account'),
     };
