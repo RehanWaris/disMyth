@@ -759,7 +759,7 @@ class Component extends DCLogic {
     this.setState({ authBusy: true, authSent: false, authMsg: '' });
     window.dm.sendLink(email).then((ok) => this.setState({ authBusy: false, authSent: ok, authMsg: ok ? '' : 'Could not send the link — please try again.' }));
   }
-  signOutUser() { if (window.dm) window.dm.signOut(); this.setState({ authSent: false, authMsg: '' }); }
+  signOutUser() { if (window.dm) window.dm.signOut(); this.setState({ authSent: false, authMsg: '', _rev: Date.now() }); }
   loadLedger() {
     var SB = 'https://lrauoqykwgwhxxhpffzf.supabase.co';
     var KEY = 'sb_publishable_FrH0thOASEhj0-5pczDPVQ_tYiNBGDS';
