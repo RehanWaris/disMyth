@@ -24,7 +24,25 @@
 <meta name="apple-mobile-web-app-title" content="DisMyth">
 <script src="./support.js"></script>
 </head>
-<body>
+<body><script>
+(function(){
+  var SB='https://lrauoqykwgwhxxhpffzf.supabase.co', KEY='sb_publishable_FrH0thOASEhj0-5pczDPVQ_tYiNBGDS', LS='dm_session';
+  function jwt(t,f){ try{ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))[f]||''; }catch(e){ return ''; } }
+  var dm=window.dm={ session:null, email:'' };
+  try{ var st=JSON.parse(localStorage.getItem(LS)||'null'); if(st&&st.access_token) dm.session=st; }catch(e){}
+  if(location.hash && location.hash.indexOf('access_token=')!==-1){
+    var h=new URLSearchParams(location.hash.slice(1)), at=h.get('access_token');
+    if(at){ dm.session={ access_token:at, refresh_token:h.get('refresh_token')||'', email:jwt(at,'email'), user_id:jwt(at,'sub') };
+      try{ localStorage.setItem(LS,JSON.stringify(dm.session)); }catch(e){}
+      history.replaceState(null,'',location.pathname+location.search); }
+  }
+  dm.email=dm.session?dm.session.email:'';
+  dm.sendLink=function(email){ return fetch(SB+'/auth/v1/otp?redirect_to='+encodeURIComponent(location.origin+'/app.html'),{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,create_user:true})}).then(function(r){return r.ok;}).catch(function(){return false;}); };
+  dm.oauth=function(p){ location.href=SB+'/auth/v1/authorize?provider='+p+'&redirect_to='+encodeURIComponent(location.origin+'/app.html'); };
+  dm.signOut=function(){ dm.session=null; dm.email=''; try{ localStorage.removeItem(LS); }catch(e){} };
+  dm.saveProfile=function(f){ if(!dm.session) return Promise.resolve(false); return fetch(SB+'/rest/v1/profiles?id=eq.'+dm.session.user_id,{method:'PATCH',headers:{'content-type':'application/json',apikey:KEY,authorization:'Bearer '+dm.session.access_token,prefer:'return=minimal'},body:JSON.stringify(f)}).then(function(r){return r.ok;}).catch(function(){return false;}); };
+})();
+</script>
 <x-dc>
 <helmet data-dc-atomics>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -68,9 +86,10 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px;margin-top:16px">EMAIL OR PHONE</div>
 <input value="{{ regContact }}" onInput="{{ onContact }}" placeholder="you@example.com" style="width:100%;box-sizing:border-box;margin-top:6px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:13px;color:#eef1f6;font-size:14px"/>
 <div style="margin-top:18px;display:flex;gap:9px">
-<div style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Continue with Google</div>
-<div style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Apple</div>
+<div onClick="{{ googleAuth }}" style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Continue with Google</div>
+<div onClick="{{ appleAuth }}" style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Apple</div>
 </div>
+<div style="margin-top:12px;text-align:center;font:11px/1.4 Inter;color:oklch(0.72 0.15 145);min-height:14px">{{ authStatus }}</div>
 </sc-if>
 
 <sc-if value="{{ isS1 }}" hint-placeholder-val="{{ false }}">
@@ -189,6 +208,12 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
 <div class="dm-scr">
 <a href="index.html" style="display:block;padding:16px 20px 0;font:600 12px Inter;color:#8a93a0">← Back to dismyth.app</a>
+<sc-if value="{{ isSignedIn }}" hint-placeholder-val="{{ false }}">
+<div style="margin:14px 20px 0;background:#12151b;border:1px solid #1c2128;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between"><div style="min-width:0"><div style="font:9px JetBrains Mono;color:oklch(0.72 0.15 145)">SIGNED IN</div><div style="font:600 13px Inter;color:#eef1f6;margin-top:3px;overflow:hidden;text-overflow:ellipsis">{{ userEmail }}</div></div><div onClick="{{ signOutUser }}" style="flex:none;font:600 12px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:9px;padding:8px 12px;cursor:pointer">Sign out</div></div>
+</sc-if>
+<sc-if value="{{ notSignedIn }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ openOnboarding }}" style="margin:14px 20px 0;background:oklch(0.72 0.15 145 / .12);border:1px solid oklch(0.72 0.15 145 / .35);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer"><div style="font:600 13px Inter;color:#eef1f6">Sign in / create a free account</div><span style="font:600 13px Inter;color:oklch(0.82 0.12 150)">→</span></div>
+</sc-if>
 <div style="padding:40px 20px 12px;display:flex;align-items:center;justify-content:space-between"><div><div style="font:700 17px Space Grotesk">Plans</div><div style="font:11px Inter;color:#7a828f;margin-top:2px">Free to fight lies. Pay to broadcast truth.</div></div><div onClick="{{ goCompare }}" style="font:11px JetBrains Mono;color:oklch(0.72 0.11 220);cursor:pointer;text-align:right">Compare<br/>all →</div></div>
 <div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px;display:flex;flex-direction:column;gap:12px">
 <div style="background:#12151b;border:1px solid #1c2128;border-radius:16px;padding:16px">
@@ -766,9 +791,24 @@ class Component extends DCLogic {
   exOpen(k) { const v = this.state.explain[k]; return v == null ? !!(this.props && this.props.explainersOpen) : v; }
   toggleExplain(k) { const nv = !this.exOpen(k); this.setState(s => ({ explain: { ...s.explain, [k]: nv } })); }
 
-  obNext() { if (this.state.step >= 4) { this.setState({ screen: 'feed' }); } else { this.setState(s => ({ step: s.step + 1 })); } }
+  obNext() {
+    var S = this.state;
+    if (S.step === 0 && !(window.dm && window.dm.session)) {
+      var e = (S.reg.contact || '').trim();
+      if (e.indexOf('@') !== -1) { this.sendMagicLink(e); return; }
+    }
+    if (S.step >= 4) {
+      if (window.dm && window.dm.session) window.dm.saveProfile({ full_name: S.reg.name || null, region: S.reg.region || null, topics: Object.keys(S.topicsSel || {}).filter((k) => S.topicsSel[k]) });
+      this.setState({ screen: 'feed' });
+    } else { this.setState((s) => ({ step: s.step + 1 })); }
+  }
   obBack() { this.setState(s => ({ step: Math.max(0, s.step - 1) })); }
 
+  sendMagicLink(email) {
+    this.setState({ authBusy: true, authSent: false, authMsg: '' });
+    window.dm.sendLink(email).then((ok) => this.setState({ authBusy: false, authSent: ok, authMsg: ok ? '' : 'Could not send the link — please try again.' }));
+  }
+  signOutUser() { if (window.dm) window.dm.signOut(); this.setState({ authSent: false, authMsg: '' }); }
   loadLedger() {
     var SB = 'https://lrauoqykwgwhxxhpffzf.supabase.co';
     var KEY = 'sb_publishable_FrH0thOASEhj0-5pczDPVQ_tYiNBGDS';
@@ -974,6 +1014,11 @@ class Component extends DCLogic {
       detectLocation: () => this.detectLocation(),
       ledgerTotal: (S.ledgerTotal != null ? S.ledgerTotal : '0'), ledger30d: (S.ledger30d != null ? S.ledger30d : '0'), ledgerFalse: (S.ledgerFalse != null ? S.ledgerFalse : '0'),
       shareVerdict: () => this.shareVerdict(), shareCopied: S.shareCopied,
+      isSignedIn: !!(window.dm && window.dm.session), notSignedIn: !(window.dm && window.dm.session), userEmail: (window.dm && window.dm.email) || '',
+      authStatus: S.authBusy ? 'Sending your sign-in linkâ¦' : (S.authSent ? '✓ Check your email and tap the link to finish signing in.' : (S.authMsg || '')),
+      googleAuth: () => { if (window.dm) window.dm.oauth('google'); },
+      appleAuth: () => this.setState({ authMsg: 'Apple sign-in is coming soon — use Google or email for now.' }),
+      signOutUser: () => this.signOutUser(),
       geoLabel: S.geoStatus === 'locating' ? '· locating…' : S.geoStatus === 'denied' ? '· location blocked' : S.geoStatus === 'error' ? '· tap to retry' : (S.geoStatus === 'done' || S.reg.region) ? '' : '· tap to detect',
       openCompose: () => this.setState({ screen: 'compose', published: false }), openVerdictBack: () => this.setState({ screen: 'verdict' }), publish: () => this.setState({ published: true }),
       tabFeed: tab('feed'), tabMap: tab('map'), tabAlerts: tab('alerts'), tabAccount: tab('account'),

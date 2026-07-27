@@ -81,6 +81,28 @@ self.addEventListener('activate', function(e){ e.waitUntil(self.clients.claim())
 self.addEventListener('fetch', function(e){ /* network passthrough */ });
 '''
 
+# Supabase auth engine (email magic-link + OAuth + session). Runs on load,
+# captures the redirect tokens, and exposes window.dm for the app to call.
+AUTH_SCRIPT = '''<script>
+(function(){
+  var SB='https://lrauoqykwgwhxxhpffzf.supabase.co', KEY='sb_publishable_FrH0thOASEhj0-5pczDPVQ_tYiNBGDS', LS='dm_session';
+  function jwt(t,f){ try{ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))[f]||''; }catch(e){ return ''; } }
+  var dm=window.dm={ session:null, email:'' };
+  try{ var st=JSON.parse(localStorage.getItem(LS)||'null'); if(st&&st.access_token) dm.session=st; }catch(e){}
+  if(location.hash && location.hash.indexOf('access_token=')!==-1){
+    var h=new URLSearchParams(location.hash.slice(1)), at=h.get('access_token');
+    if(at){ dm.session={ access_token:at, refresh_token:h.get('refresh_token')||'', email:jwt(at,'email'), user_id:jwt(at,'sub') };
+      try{ localStorage.setItem(LS,JSON.stringify(dm.session)); }catch(e){}
+      history.replaceState(null,'',location.pathname+location.search); }
+  }
+  dm.email=dm.session?dm.session.email:'';
+  dm.sendLink=function(email){ return fetch(SB+'/auth/v1/otp?redirect_to='+encodeURIComponent(location.origin+'/app.html'),{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,create_user:true})}).then(function(r){return r.ok;}).catch(function(){return false;}); };
+  dm.oauth=function(p){ location.href=SB+'/auth/v1/authorize?provider='+p+'&redirect_to='+encodeURIComponent(location.origin+'/app.html'); };
+  dm.signOut=function(){ dm.session=null; dm.email=''; try{ localStorage.removeItem(LS); }catch(e){} };
+  dm.saveProfile=function(f){ if(!dm.session) return Promise.resolve(false); return fetch(SB+'/rest/v1/profiles?id=eq.'+dm.session.user_id,{method:'PATCH',headers:{'content-type':'application/json',apikey:KEY,authorization:'Bearer '+dm.session.access_token,prefer:'return=minimal'},body:JSON.stringify(f)}).then(function(r){return r.ok;}).catch(function(){return false;}); };
+})();
+</script>'''
+
 SW_REGISTER = ('''<script>if('serviceWorker' in navigator){'''
                '''window.addEventListener('load',function(){'''
                '''navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>''')
@@ -303,6 +325,7 @@ def build():
             html = patch_runcheck(html)
             html = patch_consensus(html)
             html = reshell_app(html)
+            html = html.replace("<body>", "<body>" + AUTH_SCRIPT, 1)
         # register the service worker so the site is an installable PWA
         html = html.replace("</body>", SW_REGISTER + "</body>", 1)
         open(os.path.join(DIST, out_name), "w", encoding="utf-8").write(html)
