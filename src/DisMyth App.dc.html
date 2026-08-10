@@ -55,6 +55,11 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div onClick="{{ googleAuth }}" style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Continue with Google</div>
 <div onClick="{{ appleAuth }}" style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:11px;padding:11px 6px;cursor:pointer">Apple</div>
 </div>
+<sc-if value="{{ showCodeBox }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:16px;font:10px JetBrains Mono;color:#5a626f;letter-spacing:1px">6-DIGIT CODE</div>
+<input value="{{ regCode }}" onInput="{{ onCode }}" inputmode="numeric" maxlength="6" placeholder="123456" style="width:100%;box-sizing:border-box;margin-top:6px;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:13px;color:#eef1f6;font-size:22px;letter-spacing:8px;text-align:center;font-family:'JetBrains Mono',monospace"/>
+<div onClick="{{ resendCode }}" style="margin-top:10px;text-align:center;font:600 11px Inter;color:#8a93a0;cursor:pointer">Didn’t get it? Resend code</div>
+</sc-if>
 <div style="margin-top:12px;text-align:center;font:11px/1.4 Inter;color:oklch(0.72 0.15 145);min-height:14px">{{ authStatus }}</div>
 </sc-if>
 
@@ -746,6 +751,12 @@ class Component extends DCLogic {
     var S = this.state;
     if (S.step === 0 && !(window.dm && window.dm.session)) {
       var e = (S.reg.contact || '').trim();
+      if (S.authSent) {
+        var code = (S.reg.code || '').replace(/\s/g, '');
+        if (code) { this.verifyOtp(e, code); }
+        else { this.setState({ authMsg: 'Enter the 6-digit code from your email.' }); }
+        return;
+      }
       if (e.indexOf('@') !== -1) { this.sendMagicLink(e); return; }
     }
     if (S.step >= 4) {
@@ -757,7 +768,14 @@ class Component extends DCLogic {
 
   sendMagicLink(email) {
     this.setState({ authBusy: true, authSent: false, authMsg: '' });
-    window.dm.sendLink(email).then((ok) => this.setState({ authBusy: false, authSent: ok, authMsg: ok ? '' : 'Could not send the link — please try again.' }));
+    window.dm.sendLink(email).then((ok) => this.setState({ authBusy: false, authSent: ok, authMsg: ok ? '' : 'Could not send the code — please try again.' }));
+  }
+  verifyOtp(email, code) {
+    this.setState({ authBusy: true, authMsg: '' });
+    window.dm.verifyCode(email, code).then((ok) => {
+      if (ok) { this.setState({ authBusy: false, authMsg: '', authSent: false, step: 1, _rev: Date.now() }); }
+      else { this.setState({ authBusy: false, authMsg: 'That code didn’t work — check it and try again, or resend.' }); }
+    });
   }
   signOutUser() { if (window.dm) window.dm.signOut(); this.setState({ authSent: false, authMsg: '', _rev: Date.now() }); }
   loadLedger() {
@@ -938,12 +956,13 @@ class Component extends DCLogic {
       tLinkC: S.attachType === 'link' ? '#04140b' : '#c4ccd6', tLinkB: S.attachType === 'link' ? 'oklch(0.72 0.15 145)' : '#12151b', tLinkBr: S.attachType === 'link' ? 'oklch(0.72 0.15 145)' : '#262c34',
       tPhotoC: S.attachType === 'photo' ? '#04140b' : '#c4ccd6', tPhotoB: S.attachType === 'photo' ? 'oklch(0.72 0.15 145)' : '#12151b', tPhotoBr: S.attachType === 'photo' ? 'oklch(0.72 0.15 145)' : '#262c34',
       tVideoC: S.attachType === 'video' ? '#04140b' : '#c4ccd6', tVideoB: S.attachType === 'video' ? 'oklch(0.72 0.15 145)' : '#12151b', tVideoBr: S.attachType === 'video' ? 'oklch(0.72 0.15 145)' : '#262c34',
-      regName: S.reg.name, regContact: S.reg.contact, regRegion: S.reg.region,
-      onName: e => this.set('name', e.target.value), onContact: e => this.set('contact', e.target.value), onRegion: e => this.set('region', e.target.value),
+      regName: S.reg.name, regContact: S.reg.contact, regRegion: S.reg.region, regCode: S.reg.code || '',
+      onName: e => this.set('name', e.target.value), onContact: e => this.set('contact', e.target.value), onRegion: e => this.set('region', e.target.value), onCode: e => this.set('code', e.target.value),
+      showCodeBox: !!S.authSent, resendCode: () => { var e = (S.reg.contact || '').trim(); if (e.indexOf('@') !== -1) this.sendMagicLink(e); },
       topics, notifs, planPicks,
       stepDots, stepNo: S.step + 1, stepTitle: stepTitles[S.step],
       isS0: S.step === 0, isS1: S.step === 1, isS2: S.step === 2, isS3: S.step === 3, isS4: S.step === 4,
-      canBack: S.step > 0, obNextLabel: S.step >= 4 ? 'Create account →' : 'Continue →',
+      canBack: S.step > 0, obNextLabel: (S.step === 0 && !(window.dm && window.dm.session)) ? (S.authSent ? 'Verify & sign in →' : 'Send me a code →') : (S.step >= 4 ? 'Create account →' : 'Continue →'),
       obNext: () => this.obNext(), obBack: () => this.obBack(),
       savedTopics, alertRules, trending, team, compareRows,
       goFeed: () => this.go('feed'), goMap: () => this.go('map'), goAlerts: () => this.go('alerts'), goAccount: () => this.go('account'),
@@ -958,7 +977,7 @@ class Component extends DCLogic {
       ledgerTotal: (S.ledgerTotal != null ? S.ledgerTotal : '0'), ledger30d: (S.ledger30d != null ? S.ledger30d : '0'), ledgerFalse: (S.ledgerFalse != null ? S.ledgerFalse : '0'),
       shareVerdict: () => this.shareVerdict(), shareCopied: S.shareCopied,
       isSignedIn: !!(window.dm && window.dm.session), notSignedIn: !(window.dm && window.dm.session), userEmail: (window.dm && window.dm.email) || '',
-      authStatus: S.authBusy ? 'Sending your sign-in linkâ¦' : (S.authSent ? '✓ Check your email and tap the link to finish signing in.' : (S.authMsg || '')),
+      authStatus: S.authBusy ? 'Working…' : (S.authSent ? '✓ We emailed a 6-digit code — enter it above.' : (S.authMsg || '')),
       googleAuth: () => { if (window.dm) window.dm.oauth('google'); },
       appleAuth: () => this.setState({ authMsg: 'Apple sign-in is coming soon — use Google or email for now.' }),
       signOutUser: () => this.signOutUser(),

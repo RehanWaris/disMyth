@@ -97,6 +97,11 @@ AUTH_SCRIPT = '''<script>
   }
   dm.email=dm.session?dm.session.email:'';
   dm.sendLink=function(email){ return fetch(SB+'/auth/v1/otp?redirect_to='+encodeURIComponent(location.origin+'/app.html'),{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,create_user:true})}).then(function(r){return r.ok;}).catch(function(){return false;}); };
+  dm.verifyCode=function(email,code){
+    function apply(d){ if(d&&d.access_token){ dm.session={ access_token:d.access_token, refresh_token:d.refresh_token||'', email:jwt(d.access_token,'email'), user_id:jwt(d.access_token,'sub') }; dm.email=dm.session.email; try{ localStorage.setItem(LS,JSON.stringify(dm.session)); }catch(e){} return true; } return false; }
+    function attempt(type){ return fetch(SB+'/auth/v1/verify',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({type:type,email:email,token:(code||'').replace(/\\s/g,'')})}).then(function(r){return r.json();}); }
+    return attempt('email').then(function(d){ if(apply(d)) return true; return attempt('signup').then(apply); }).catch(function(){ return false; });
+  };
   dm.oauth=function(p){ location.href=SB+'/auth/v1/authorize?provider='+p+'&redirect_to='+encodeURIComponent(location.origin+'/app.html'); };
   dm.signOut=function(){ dm.session=null; dm.email=''; try{ localStorage.removeItem(LS); }catch(e){} };
   dm.saveProfile=function(f){ if(!dm.session) return Promise.resolve(false); return fetch(SB+'/rest/v1/profiles?id=eq.'+dm.session.user_id,{method:'PATCH',headers:{'content-type':'application/json',apikey:KEY,authorization:'Bearer '+dm.session.access_token,prefer:'return=minimal'},body:JSON.stringify(f)}).then(function(r){return r.ok;}).catch(function(){return false;}); };
