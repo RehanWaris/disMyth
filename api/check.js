@@ -166,6 +166,25 @@ async function voteGemini(content) {
   }
 }
 
+// Read which optional voters are enabled (set from the admin console). Best-
+// effort: any failure defaults every voter ON, so the product never breaks.
+async function readAiEnabled() {
+  const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const on = { gpt4o: true, grok: true, gemini: true };
+  if (!url || !key) return on;
+  try {
+    const r = await fetch(url.replace(/\/+$/, '') + '/rest/v1/app_settings?key=eq.ai_enabled&select=value', {
+      headers: { apikey: key, authorization: 'Bearer ' + key },
+    });
+    if (!r.ok) return on;
+    const rows = await r.json();
+    const v = rows[0] && rows[0].value;
+    return v ? Object.assign(on, v) : on;
+  } catch {
+    return on;
+  }
+}
+
 // Save each check to the Supabase "checks" table (server-side, service role).
 // Best-effort: a logging failure must never break the user's verdict.
 async function saveCheck(verdict, claim, region) {
@@ -247,10 +266,17 @@ module.exports = async function handler(req, res) {
 
   const verdict = claude.obj;
 
-  // Cross-check with any other providers whose keys are set — in parallel.
+  // Cross-check with any other providers whose keys are set AND that the owner
+  // has left enabled in the admin console — in parallel.
+  const aiOn = await readAiEnabled();
+  const off = { status: 'off' };
   const voteGPT = await voteChat('https://api.openai.com/v1/chat/completions', process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL || 'gpt-4o');
   const voteGrok = await voteChat('https://api.x.ai/v1/chat/completions', process.env.XAI_API_KEY, process.env.XAI_MODEL || 'grok-3');
-  const [gpt, grok, gem] = await Promise.all([voteGPT(content), voteGrok(content), voteGemini(content)]);
+  const [gpt, grok, gem] = await Promise.all([
+    aiOn.gpt4o !== false ? voteGPT(content) : Promise.resolve(off),
+    aiOn.grok !== false ? voteGrok(content) : Promise.resolve(off),
+    aiOn.gemini !== false ? voteGemini(content) : Promise.resolve(off),
+  ]);
 
   const models = [{ name: 'Claude', live: true, verdict: verdict.verdict, confidence: verdict.confidence }];
   const add = (name, r) => {

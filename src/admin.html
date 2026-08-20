@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>DisMyth — Admin</title>
+<meta name="theme-color" content="#0a0c10">
+<style>
+  :root{
+    --bg:#0a0c10; --surface:#12151b; --surface2:#171b25; --border:#242a38;
+    --text:#eef1f6; --muted:#98a0b2; --faint:#5a626f;
+    --accent:#8f74ff; --teal:#33d6d0; --green:#35d07f; --amber:#f0b429; --red:#ff6a6a;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(120% 70% at 50% 0%,#141821,var(--bg));color:var(--text);
+    font-family:var(--sans);min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:26px 20px 80px}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .pin{width:24px;height:24px;border-radius:6px;flex:none;
+    background:conic-gradient(from 0deg,#8f74ff 0 90deg,#4d7cff 90deg 180deg,#33d6d0 180deg 270deg,#ff5c8a 270deg 360deg)}
+  .brand b{font-size:1.02rem}
+  .brand span{font-family:var(--mono);font-size:.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  h1{font-size:1.5rem;margin:14px 0 2px;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:.9rem;margin:0 0 24px}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 18px}
+  .lbl{font-family:var(--mono);font-size:.62rem;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase}
+  input{width:100%;box-sizing:border-box;margin-top:7px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:11px;padding:13px;color:var(--text);font-size:15px;font-family:var(--sans)}
+  .code-in{font-family:var(--mono);font-size:22px;letter-spacing:8px;text-align:center}
+  button{cursor:pointer;font-family:var(--sans);border:none}
+  .btn{width:100%;margin-top:14px;background:var(--accent);color:#0a0616;font-weight:700;font-size:14px;
+    border-radius:11px;padding:13px}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--muted);font-weight:600}
+  .btn:disabled{opacity:.5;cursor:default}
+  .msg{margin-top:12px;font-size:.82rem;color:var(--teal);min-height:16px}
+  .msg.err{color:var(--red)}
+  .link{color:var(--accent);text-decoration:none}
+  .link:hover{text-decoration:underline}
+
+  .signin{max-width:380px;margin:8vh auto 0}
+  .hidden{display:none}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .who{font-size:.85rem;color:var(--muted)}
+  .who b{color:var(--text)}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+  @media(max-width:560px){.grid{grid-template-columns:1fr 1fr}}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px}
+  .stat .n{font-size:1.9rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+  .stat .c{font-family:var(--mono);font-size:.6rem;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-top:3px}
+  .stat.false .n{color:var(--amber)}
+
+  .section{margin-top:22px}
+  .section h2{font-size:.95rem;margin:0 0 10px;letter-spacing:-.2px}
+  .section h2 .hint{font-family:var(--mono);font-size:.58rem;letter-spacing:1px;color:var(--faint);text-transform:uppercase;font-weight:400;margin-left:8px}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid var(--border)}
+  .toggle-row:last-child{border-bottom:none}
+  .toggle-row .nm{font-weight:600;font-size:.92rem}
+  .toggle-row .st{font-family:var(--mono);font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--faint)}
+  .sw{position:relative;width:44px;height:26px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);flex:none;transition:.15s}
+  .sw.on{background:var(--green);border-color:var(--green)}
+  .sw .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s}
+  .sw.on .knob{left:20px}
+  .sw.locked{opacity:.6;cursor:default}
+  .pill{font-family:var(--mono);font-size:.56rem;letter-spacing:1px;text-transform:uppercase;color:var(--teal);
+    border:1px solid var(--teal);border-radius:20px;padding:3px 8px}
+
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th{text-align:left;font-family:var(--mono);font-size:.58rem;letter-spacing:1px;color:var(--faint);
+    text-transform:uppercase;font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border)}
+  td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+  td.v{font-weight:700;white-space:nowrap}
+  .v-True{color:var(--green)} .v-False{color:var(--red)} .v-Misleading{color:var(--amber)}
+  .v-Unverified,.v-Unknown{color:var(--muted)}
+  .claim{color:var(--text)}
+  .when{color:var(--faint);font-family:var(--mono);font-size:.72rem;white-space:nowrap}
+  .scroll{overflow-x:auto}
+  .empty{color:var(--muted);font-size:.85rem;padding:12px 2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="pin"></span><div><b>DisMyth</b><br><span>Admin console</span></div></div>
+
+  <!-- SIGN IN -->
+  <div id="signin" class="signin hidden">
+    <h1>Owner sign-in</h1>
+    <p class="sub">This console is private. Sign in with your owner email.</p>
+    <div class="card">
+      <div id="step-email">
+        <div class="lbl">Owner email</div>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email"/>
+        <button class="btn" id="sendBtn" onclick="sendCode()">Send me a code</button>
+      </div>
+      <div id="step-code" class="hidden">
+        <div class="lbl">6-digit code</div>
+        <input id="code" class="code-in" inputmode="numeric" maxlength="6" placeholder="123456"/>
+        <button class="btn" id="verifyBtn" onclick="verify()">Verify &amp; enter</button>
+        <button class="btn ghost" onclick="resetSignin()">Use a different email</button>
+      </div>
+      <div id="authMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- NOT ADMIN -->
+  <div id="denied" class="signin hidden">
+    <h1>Not an admin account</h1>
+    <p class="sub">You're signed in as <b id="deniedEmail"></b>, which isn't an owner account. Ask for access, or sign in with the owner email.</p>
+    <div class="card"><button class="btn ghost" onclick="signOut()">Sign out</button></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dash" class="hidden">
+    <div class="topbar">
+      <div>
+        <h1 style="margin-bottom:0">Control room</h1>
+        <div class="who">Signed in as <b id="who"></b></div>
+      </div>
+      <button class="btn ghost" style="width:auto;margin-top:0;padding:10px 16px" onclick="signOut()">Sign out</button>
+    </div>
+
+    <div class="grid">
+      <div class="stat"><div class="n" id="s-total">—</div><div class="c">Total checks</div></div>
+      <div class="stat"><div class="n" id="s-30d">—</div><div class="c">Last 30 days</div></div>
+      <div class="stat false"><div class="n" id="s-false">—</div><div class="c">False / misleading</div></div>
+    </div>
+
+    <div class="section">
+      <h2>AI voters <span class="hint">changes take effect on the next check</span></h2>
+      <div class="card" id="toggles">
+        <div class="toggle-row">
+          <div><div class="nm">Claude <span class="pill">Primary</span></div><div class="st">Produces the verdict &amp; evidence</div></div>
+          <div class="sw on locked" title="Claude is the primary engine and stays on"><div class="knob"></div></div>
+        </div>
+        <div class="toggle-row" data-ai="gpt4o"><div><div class="nm">GPT-4o</div><div class="st" id="st-gpt4o">—</div></div><div class="sw" onclick="toggleAI('gpt4o')"><div class="knob"></div></div></div>
+        <div class="toggle-row" data-ai="grok"><div><div class="nm">Grok</div><div class="st" id="st-grok">—</div></div><div class="sw" onclick="toggleAI('grok')"><div class="knob"></div></div></div>
+        <div class="toggle-row" data-ai="gemini"><div><div class="nm">Gemini</div><div class="st" id="st-gemini">—</div></div><div class="sw" onclick="toggleAI('gemini')"><div class="knob"></div></div></div>
+      </div>
+      <div id="toggleMsg" class="msg"></div>
+    </div>
+
+    <div class="section">
+      <h2>Verdict breakdown</h2>
+      <div class="card" id="breakdown"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="section">
+      <h2>Recent checks <span class="hint">latest 15</span></h2>
+      <div class="card scroll" id="recentWrap"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="section">
+      <h2>Waitlist sign-ups</h2>
+      <div class="card">
+        <p class="sub" style="margin:0 0 12px">Your "Notify me" sign-ups are collected in Formspree. View and export them there.</p>
+        <a class="link" href="https://formspree.io/forms" target="_blank" rel="noopener">Open Formspree submissions →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SB='https://lrauoqykwgwhxxhpffzf.supabase.co';
+  var KEY='sb_publishable_FrH0thOASEhj0-5pczDPVQ_tYiNBGDS';
+  var LS='dm_session';
+  var ADMINS=['rehan.waris@gmail.com'];   // UI gate only; real security is server-side (RLS + admin_overview)
+  var session=null, aiState={gpt4o:true,grok:true,gemini:true}, pendingEmail='';
+
+  function jwt(t,f){ try{ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))[f]||''; }catch(e){ return ''; } }
+  function $(id){ return document.getElementById(id); }
+  function show(id){ ['signin','denied','dash'].forEach(function(x){ $(x).classList.toggle('hidden', x!==id); }); }
+
+  function loadSession(){ try{ var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&s.access_token) return s; }catch(e){} return null; }
+  function saveSession(s){ session=s; try{ localStorage.setItem(LS,JSON.stringify(s)); }catch(e){} }
+
+  window.sendCode=function(){
+    var email=($('email').value||'').trim();
+    if(email.indexOf('@')===-1){ authMsg('Enter a valid email.',true); return; }
+    pendingEmail=email;
+    $('sendBtn').disabled=true; authMsg('Sending your code…');
+    fetch(SB+'/auth/v1/otp',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,create_user:true})})
+      .then(function(r){
+        $('sendBtn').disabled=false;
+        if(r.ok){ $('step-email').classList.add('hidden'); $('step-code').classList.add('hidden'); $('step-code').classList.remove('hidden'); authMsg('✓ We emailed a 6-digit code to '+email+'.'); }
+        else if(r.status===429){ authMsg('Too many emails just now — wait a bit and try again.',true); }
+        else{ authMsg('Could not send the code — please try again.',true); }
+      }).catch(function(){ $('sendBtn').disabled=false; authMsg('Network error — please try again.',true); });
+  };
+
+  window.verify=function(){
+    var code=($('code').value||'').replace(/\s/g,'');
+    if(!code){ authMsg('Enter the 6-digit code.',true); return; }
+    $('verifyBtn').disabled=true; authMsg('Checking…');
+    function attempt(type){ return fetch(SB+'/auth/v1/verify',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({type:type,email:pendingEmail,token:code})}).then(function(r){return r.json();}); }
+    attempt('email').then(function(d){ if(d&&d.access_token) return d; return attempt('signup'); })
+      .then(function(d){
+        $('verifyBtn').disabled=false;
+        if(d&&d.access_token){ saveSession({access_token:d.access_token,refresh_token:d.refresh_token||'',email:jwt(d.access_token,'email')}); route(); }
+        else{ authMsg('That code didn’t work — check it and try again.',true); }
+      }).catch(function(){ $('verifyBtn').disabled=false; authMsg('Something went wrong — try again.',true); });
+  };
+
+  window.resetSignin=function(){ $('step-code').classList.add('hidden'); $('step-email').classList.remove('hidden'); authMsg(''); };
+  window.signOut=function(){ session=null; try{ localStorage.removeItem(LS); }catch(e){} show('signin'); resetSignin(); };
+  function authMsg(t,err){ var m=$('authMsg'); m.textContent=t||''; m.className='msg'+(err?' err':''); }
+
+  function route(){
+    session=loadSession();
+    if(!session){ show('signin'); return; }
+    var email=session.email||jwt(session.access_token,'email');
+    if(ADMINS.indexOf(email)===-1){ $('deniedEmail').textContent=email||'this account'; show('denied'); return; }
+    $('who').textContent=email; show('dash'); loadDashboard();
+  }
+
+  function authHeaders(){ return {apikey:KEY, authorization:'Bearer '+session.access_token, 'content-type':'application/json'}; }
+
+  function loadDashboard(){
+    // headline numbers (public function)
+    fetch(SB+'/rest/v1/rpc/ledger_stats',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+KEY,'content-type':'application/json'},body:'{}'})
+      .then(function(r){return r.json();}).then(function(d){ var x=Array.isArray(d)?d[0]:d; if(x){ $('s-total').textContent=x.total_checks; $('s-30d').textContent=x.checks_30d; $('s-false').textContent=x.false_or_misleading; } }).catch(function(){});
+
+    // AI settings
+    fetch(SB+'/rest/v1/app_settings?key=eq.ai_enabled&select=value',{headers:authHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){ if(rows&&rows[0]&&rows[0].value) aiState=Object.assign(aiState,rows[0].value); paintToggles(); }).catch(paintToggles);
+
+    // admin-only overview (verdict breakdown + recent)
+    fetch(SB+'/rest/v1/rpc/admin_overview',{method:'POST',headers:authHeaders(),body:'{}'})
+      .then(function(r){return r.json();}).then(function(d){
+        if(!d || typeof d!=='object' || !('by_verdict' in d)){
+          var m=(d && d.error==='not_authorized') ? 'This account is not authorized for detailed stats.'
+               : 'Detailed stats need the one-time database step (run the admin SQL). Your headline numbers above are already live.';
+          $('breakdown').innerHTML='<div class="empty">'+m+'</div>'; $('recentWrap').innerHTML='<div class="empty">Waiting on the database step.</div>'; return;
+        }
+        paintBreakdown(d.by_verdict||{}); paintRecent(d.recent||[]);
+      }).catch(function(){ $('breakdown').innerHTML='<div class="empty">Could not load detailed stats.</div>'; $('recentWrap').innerHTML=''; });
+  }
+
+  function paintToggles(){
+    ['gpt4o','grok','gemini'].forEach(function(k){
+      var row=document.querySelector('[data-ai="'+k+'"]'); if(!row) return;
+      var on=aiState[k]!==false;
+      row.querySelector('.sw').classList.toggle('on',on);
+      $('st-'+k).textContent=on?'Voting on every check':'Turned off — not called';
+    });
+  }
+
+  window.toggleAI=function(k){
+    var next=Object.assign({},aiState); next[k]=!(aiState[k]!==false);
+    tMsg('Saving…');
+    fetch(SB+'/rest/v1/app_settings',{method:'POST',headers:Object.assign({prefer:'resolution=merge-duplicates,return=minimal'},authHeaders()),body:JSON.stringify({key:'ai_enabled',value:next})})
+      .then(function(r){ if(r.ok){ aiState=next; paintToggles(); tMsg('Saved ✓ '+(next[k]!==false?k+' turned on':k+' turned off')); } else { tMsg('Could not save — you may not have owner rights.',true); } })
+      .catch(function(){ tMsg('Network error — not saved.',true); });
+  };
+  function tMsg(t,err){ var m=$('toggleMsg'); m.textContent=t||''; m.className='msg'+(err?' err':''); setTimeout(function(){ if(m.textContent===t) m.textContent=''; },4000); }
+
+  function paintBreakdown(by){
+    var keys=Object.keys(by); if(!keys.length){ $('breakdown').innerHTML='<div class="empty">No checks recorded yet.</div>'; return; }
+    var total=keys.reduce(function(a,k){return a+by[k];},0);
+    var order=['True','False','Misleading','Unverified','Unknown'];
+    keys.sort(function(a,b){var ia=order.indexOf(a),ib=order.indexOf(b);return (ia<0?9:ia)-(ib<0?9:ib);});
+    var html=keys.map(function(k){
+      var pct=total?Math.round(by[k]/total*100):0;
+      return '<div style="margin:9px 0"><div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:5px"><span class="v-'+esc(k)+'" style="font-weight:600">'+esc(k)+'</span><span class="when">'+by[k]+' · '+pct+'%</span></div>'+
+        '<div style="height:7px;border-radius:6px;background:var(--surface2);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--accent)"></div></div></div>';
+    }).join('');
+    $('breakdown').innerHTML=html;
+  }
+
+  function paintRecent(rows){
+    if(!rows.length){ $('recentWrap').innerHTML='<div class="empty">No checks recorded yet.</div>'; return; }
+    var body=rows.map(function(r){
+      var v=esc(r.verdict||'Unknown');
+      return '<tr><td class="v v-'+v+'">'+v+'</td><td class="claim">'+esc((r.claim||'').slice(0,110))+'</td><td class="when">'+fmt(r.created_at)+'</td></tr>';
+    }).join('');
+    $('recentWrap').innerHTML='<table><thead><tr><th>Verdict</th><th>Claim</th><th>When</th></tr></thead><tbody>'+body+'</tbody></table>';
+  }
+
+  function fmt(s){ try{ var d=new Date(s); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }catch(e){ return s||''; } }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  route();
+})();
+</script>
+</body>
+</html>

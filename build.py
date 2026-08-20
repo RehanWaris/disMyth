@@ -336,6 +336,10 @@ def build():
         open(os.path.join(DIST, out_name), "w", encoding="utf-8").write(html)
         print(f"  {src_name}  ->  dist/{out_name}")
 
+    # private owner console (self-contained; not crawled, not in sitemap)
+    shutil.copyfile(os.path.join(SRC, "admin.html"), os.path.join(DIST, "admin.html"))
+    print("  admin.html  ->  dist/admin.html")
+
     # serverless verification function + owner setup files (Milestone 2)
     os.makedirs(os.path.join(DIST, "api"), exist_ok=True)
     shutil.copyfile(os.path.join(HERE, "api", "check.js"),
@@ -348,7 +352,7 @@ def build():
     open(os.path.join(DIST, "404.html"), "w", encoding="utf-8").write(NOT_FOUND)
     # robots.txt (block the confidential brief + the api from crawlers)
     open(os.path.join(DIST, "robots.txt"), "w", encoding="utf-8").write(
-        "User-agent: *\nAllow: /\nDisallow: /brief.html\nDisallow: /api/\n"
+        "User-agent: *\nAllow: /\nDisallow: /brief.html\nDisallow: /admin.html\nDisallow: /api/\n"
         f"Sitemap: {DOMAIN}/sitemap.xml\n")
     # sitemap (public pages only)
     urls = "".join(
