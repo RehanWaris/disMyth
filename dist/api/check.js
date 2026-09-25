@@ -52,6 +52,18 @@ function firstJsonObject(text) {
   return JSON.parse(m ? m[0] : s);
 }
 
+// fetch with a hard timeout, so one slow upstream can never stall the whole
+// request into the platform's 60s function limit (which shows users an error).
+async function fetchTO(url, opts, ms) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    return await fetch(url, Object.assign({}, opts, { signal: ctl.signal }));
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function readBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   if (typeof req.body === 'string' && req.body) return JSON.parse(req.body);
@@ -66,7 +78,7 @@ async function readBody(req) {
 function webTools(model) {
   if (process.env.DISMYTH_WEB_SEARCH === 'off') return undefined;
   const basic = /haiku|sonnet-4-5|opus-4-5|opus-4-1|opus-4-0|claude-3/.test(model);
-  return [{ type: basic ? 'web_search_20250305' : 'web_search_20260209', name: 'web_search', max_uses: 5 }];
+  return [{ type: basic ? 'web_search_20250305' : 'web_search_20260209', name: 'web_search', max_uses: 3 }];
 }
 
 // Primary check: Claude, optionally grounded with live web search.
@@ -74,7 +86,12 @@ async function callClaude(content, key, model) {
   const tools = webTools(model);
   let messages = [{ role: 'user', content }];
   let data;
-  for (let i = 0; i < 4; i++) {
+  // Stay well under the 60s platform cap: give the whole Claude+search phase a
+  // hard budget and abort rather than let it run into a 504.
+  const deadline = Date.now() + 42000;
+  for (let i = 0; i < 3; i++) {
+    const remaining = deadline - Date.now();
+    if (remaining < 3000) return { ok: false, status: 408, detail: 'Claude search phase exceeded its time budget.' };
     const payload = {
       model,
       max_tokens: 1024,
@@ -85,11 +102,16 @@ async function callClaude(content, key, model) {
       messages,
     };
     if (tools) payload.tools = tools;
-    const r = await fetch(ANTHROPIC_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify(payload),
-    });
+    let r;
+    try {
+      r = await fetchTO(ANTHROPIC_URL, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify(payload),
+      }, remaining);
+    } catch (e) {
+      return { ok: false, status: 408, detail: 'Claude request timed out.' };
+    }
     if (!r.ok) return { ok: false, status: r.status, detail: await r.text().catch(() => '') };
     data = await r.json();
     // Server ran the search loop to its cap — resume once more.
@@ -112,7 +134,7 @@ async function voteChat(url, key, model) {
   return async function (content) {
     if (!key) return { status: 'not_connected' };
     try {
-      const r = await fetch(url, {
+      const r = await fetchTO(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + key },
         body: JSON.stringify({
@@ -123,7 +145,7 @@ async function voteChat(url, key, model) {
             { role: 'user', content },
           ],
         }),
-      });
+      }, 20000);
       if (!r.ok) return { status: 'error' };
       const d = await r.json();
       const t = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
@@ -144,7 +166,7 @@ async function voteGemini(content) {
     const model = process.env.GEMINI_MODEL || 'gemini-flash-latest';
     const url =
       'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
-    const r = await fetch(url, {
+    const r = await fetchTO(url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -152,7 +174,7 @@ async function voteGemini(content) {
         contents: [{ role: 'user', parts: [{ text: content }] }],
         generationConfig: { maxOutputTokens: 512, responseMimeType: 'application/json' },
       }),
-    });
+    }, 20000);
     if (!r.ok) return { status: 'error' };
     const d = await r.json();
     // Newer (thinking) models can split the reply across parts — join all text.
@@ -223,7 +245,10 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return json(405, { error: 'Use POST.' });
 
   const key = process.env.ANTHROPIC_API_KEY;
-  const model = process.env.DISMYTH_MODEL || 'claude-opus-5';
+  // Sonnet is fast and strong for grounded fact-checking; the 4-AI consensus +
+  // live web sources keep quality high. (Was opus-5, which was slow enough to
+  // hit the platform timeout on heavy searches.) Override with DISMYTH_MODEL.
+  const model = process.env.DISMYTH_MODEL || 'claude-sonnet-5';
 
   let body;
   try {
@@ -251,32 +276,33 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const claude = await callClaude(content, key, model);
+  // Run the primary Claude check AND the cross-checking voters at the same time
+  // (voters assess the raw claim independently), so total latency is the slowest
+  // single model, not the sum. Voter set honours the admin on/off toggles.
+  const off = { status: 'off' };
+  const voteGPT = await voteChat('https://api.openai.com/v1/chat/completions', process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL || 'gpt-4o');
+  const voteGrok = await voteChat('https://api.x.ai/v1/chat/completions', process.env.XAI_API_KEY, process.env.XAI_MODEL || 'grok-3');
+  const claudeP = callClaude(content, key, model);
+  const votersP = readAiEnabled().then((aiOn) => Promise.all([
+    aiOn.gpt4o !== false ? voteGPT(content) : Promise.resolve(off),
+    aiOn.grok !== false ? voteGrok(content) : Promise.resolve(off),
+    aiOn.gemini !== false ? voteGemini(content) : Promise.resolve(off),
+  ]));
+  const [claude, [gpt, grok, gem]] = await Promise.all([claudeP, votersP]);
+
   if (!claude.ok) {
     return json(200, {
       verdict: 'Unverified',
       confidence: 40,
       claim: claim || 'Submitted item',
-      checks: ['The verification service returned an error (' + (claude.status || '?') + '). Please try again shortly.'],
-      origin: 'Upstream error',
+      checks: ['The check took longer than usual and was stopped. Please try again — it usually works on a second try.'],
+      origin: 'Timed out or upstream error',
       evidence: [],
-      _debug: (claude.detail || '').slice(0, 300),
+      _debug: (String(claude.status) + ' ' + (claude.detail || '')).slice(0, 300),
     });
   }
 
   const verdict = claude.obj;
-
-  // Cross-check with any other providers whose keys are set AND that the owner
-  // has left enabled in the admin console — in parallel.
-  const aiOn = await readAiEnabled();
-  const off = { status: 'off' };
-  const voteGPT = await voteChat('https://api.openai.com/v1/chat/completions', process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL || 'gpt-4o');
-  const voteGrok = await voteChat('https://api.x.ai/v1/chat/completions', process.env.XAI_API_KEY, process.env.XAI_MODEL || 'grok-3');
-  const [gpt, grok, gem] = await Promise.all([
-    aiOn.gpt4o !== false ? voteGPT(content) : Promise.resolve(off),
-    aiOn.grok !== false ? voteGrok(content) : Promise.resolve(off),
-    aiOn.gemini !== false ? voteGemini(content) : Promise.resolve(off),
-  ]);
 
   const models = [{ name: 'Claude', live: true, verdict: verdict.verdict, confidence: verdict.confidence }];
   const add = (name, r) => {
