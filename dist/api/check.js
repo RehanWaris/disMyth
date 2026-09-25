@@ -244,6 +244,7 @@ module.exports = async function handler(req, res) {
 
   if (req.method !== 'POST') return json(405, { error: 'Use POST.' });
 
+  const started = Date.now();
   const key = process.env.ANTHROPIC_API_KEY;
   // Sonnet is fast and strong for grounded fact-checking; the 4-AI consensus +
   // live web sources keep quality high. (Was opus-5, which was slow enough to
@@ -314,5 +315,10 @@ module.exports = async function handler(req, res) {
 
   verdict.consensus = { models };
   await saveCheck(verdict, claim, (body.region || '').toString().slice(0, 120));
+  // Non-user-facing diagnostics (which model ran + server time) — safe to read
+  // via response headers; the app ignores them.
+  res.setHeader('x-dismyth-model', model);
+  res.setHeader('x-dismyth-ms', String(Date.now() - started));
+  res.setHeader('x-dismyth-search', process.env.DISMYTH_WEB_SEARCH === 'off' ? 'off' : 'on');
   return json(200, verdict);
 };
