@@ -98,17 +98,11 @@
     <h1>Owner sign-in</h1>
     <p class="sub">This console is private. Sign in with your owner email.</p>
     <div class="card">
-      <div id="step-email">
-        <div class="lbl">Owner email</div>
-        <input id="email" type="email" placeholder="you@example.com" autocomplete="email"/>
-        <button class="btn" id="sendBtn" onclick="sendCode()">Send me a code</button>
-      </div>
-      <div id="step-code" class="hidden">
-        <div class="lbl">6-digit code</div>
-        <input id="code" class="code-in" inputmode="numeric" maxlength="6" placeholder="123456"/>
-        <button class="btn" id="verifyBtn" onclick="verify()">Verify &amp; enter</button>
-        <button class="btn ghost" onclick="resetSignin()">Use a different email</button>
-      </div>
+      <div class="lbl">Owner email</div>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="username" value="rehan.waris@gmail.com"/>
+      <div class="lbl" style="margin-top:14px">Password</div>
+      <input id="password" type="password" placeholder="Your admin password" autocomplete="current-password"/>
+      <button class="btn" id="pwBtn" onclick="signInPw()">Sign in</button>
       <div id="authMsg" class="msg"></div>
     </div>
   </div>
@@ -185,35 +179,24 @@
   function loadSession(){ try{ var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&s.access_token) return s; }catch(e){} return null; }
   function saveSession(s){ session=s; try{ localStorage.setItem(LS,JSON.stringify(s)); }catch(e){} }
 
-  window.sendCode=function(){
+  window.signInPw=function(){
     var email=($('email').value||'').trim();
-    if(email.indexOf('@')===-1){ authMsg('Enter a valid email.',true); return; }
-    pendingEmail=email;
-    $('sendBtn').disabled=true; authMsg('Sending your code…');
-    fetch(SB+'/auth/v1/otp',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,create_user:true})})
-      .then(function(r){
-        $('sendBtn').disabled=false;
-        if(r.ok){ $('step-email').classList.add('hidden'); $('step-code').classList.add('hidden'); $('step-code').classList.remove('hidden'); authMsg('✓ We emailed a 6-digit code to '+email+'.'); }
-        else if(r.status===429){ authMsg('Too many emails just now — wait a bit and try again.',true); }
-        else{ authMsg('Could not send the code — please try again.',true); }
-      }).catch(function(){ $('sendBtn').disabled=false; authMsg('Network error — please try again.',true); });
-  };
-
-  window.verify=function(){
-    var code=($('code').value||'').replace(/\s/g,'');
-    if(!code){ authMsg('Enter the 6-digit code.',true); return; }
-    $('verifyBtn').disabled=true; authMsg('Checking…');
-    function attempt(type){ return fetch(SB+'/auth/v1/verify',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({type:type,email:pendingEmail,token:code})}).then(function(r){return r.json();}); }
-    attempt('email').then(function(d){ if(d&&d.access_token) return d; return attempt('signup'); })
+    var pw=$('password').value||'';
+    if(email.indexOf('@')===-1){ authMsg('Enter your owner email.',true); return; }
+    if(!pw){ authMsg('Enter your password.',true); return; }
+    $('pwBtn').disabled=true; authMsg('Signing in…');
+    fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,password:pw})})
+      .then(function(r){ return r.json(); })
       .then(function(d){
-        $('verifyBtn').disabled=false;
-        if(d&&d.access_token){ saveSession({access_token:d.access_token,refresh_token:d.refresh_token||'',email:jwt(d.access_token,'email')}); route(); }
-        else{ authMsg('That code didn’t work — check it and try again.',true); }
-      }).catch(function(){ $('verifyBtn').disabled=false; authMsg('Something went wrong — try again.',true); });
+        $('pwBtn').disabled=false;
+        if(d&&d.access_token){ $('password').value=''; saveSession({access_token:d.access_token,refresh_token:d.refresh_token||'',email:jwt(d.access_token,'email')}); route(); }
+        else{ authMsg((d&&(d.error_description||d.msg||d.message)) || 'Wrong email or password.',true); }
+      }).catch(function(){ $('pwBtn').disabled=false; authMsg('Network error — please try again.',true); });
   };
+  // allow Enter to submit
+  document.addEventListener('keydown',function(e){ if(e.key==='Enter' && !$('signin').classList.contains('hidden')){ window.signInPw(); } });
 
-  window.resetSignin=function(){ $('step-code').classList.add('hidden'); $('step-email').classList.remove('hidden'); authMsg(''); };
-  window.signOut=function(){ session=null; try{ localStorage.removeItem(LS); }catch(e){} show('signin'); resetSignin(); };
+  window.signOut=function(){ session=null; try{ localStorage.removeItem(LS); }catch(e){} show('signin'); authMsg(''); };
   function authMsg(t,err){ var m=$('authMsg'); m.textContent=t||''; m.className='msg'+(err?' err':''); }
 
   function route(){
