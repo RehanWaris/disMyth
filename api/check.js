@@ -148,13 +148,13 @@ async function voteChat(url, key, model, extra) {
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + key },
         body: JSON.stringify(body),
       }, 28000);
-      if (!r.ok) return { status: 'error' };
+      if (!r.ok) return { status: 'error', detail: r.status + ' ' + (await r.text().catch(() => '')).slice(0, 180) };
       const d = await r.json();
       const t = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
       const j = firstJsonObject(t);
       return { verdict: j.verdict, confidence: j.confidence };
-    } catch {
-      return { status: 'error' };
+    } catch (e) {
+      return { status: 'error', detail: String(e && e.message || e).slice(0, 160) };
     }
   };
 }
@@ -321,6 +321,13 @@ module.exports = async function handler(req, res) {
   add('GPT-4o', gpt);
   add('Grok', grok);
   add('Gemini', gem);
+
+  // TEMP diagnostic: record why any voter did not appear.
+  const vdbg = [];
+  [['GPT-4o', gpt], ['Grok', grok], ['Gemini', gem]].forEach(([n, r]) => {
+    if (!r || r.status) vdbg.push(n + '=' + ((r && (r.detail || r.status)) || 'missing'));
+  });
+  if (vdbg.length) verdict._voteDebug = vdbg.join(' || ');
 
   verdict.consensus = { models };
   await saveCheck(verdict, claim, (body.region || '').toString().slice(0, 120));
