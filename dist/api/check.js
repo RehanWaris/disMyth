@@ -159,6 +159,42 @@ async function voteChat(url, key, model, extra) {
   };
 }
 
+// Web-grounded voter via the OpenAI-style Responses API (used by both OpenAI and
+// xAI now — the old chat-completions search methods were retired). The built-in
+// web_search tool runs server-side; we read the final message text.
+function voteResponses(url, key, model) {
+  return async function (content) {
+    if (!key) return { status: 'not_connected' };
+    try {
+      const r = await fetchTO(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + key },
+        body: JSON.stringify({
+          model,
+          instructions: VOTER_PROMPT,
+          input: content,
+          tools: [{ type: 'web_search' }],
+          max_output_tokens: 1500,
+        }),
+      }, 32000);
+      if (!r.ok) return { status: 'error', detail: r.status + ' ' + (await r.text().catch(() => '')).slice(0, 180) };
+      const d = await r.json();
+      let t = d.output_text || '';
+      if (!t && Array.isArray(d.output)) {
+        t = d.output
+          .flatMap((it) => (it.content || []))
+          .filter((c) => c && (c.type === 'output_text' || typeof c.text === 'string'))
+          .map((c) => c.text || '')
+          .join('');
+      }
+      const j = firstJsonObject(t);
+      return { verdict: j.verdict, confidence: j.confidence };
+    } catch (e) {
+      return { status: 'error', detail: String((e && e.message) || e).slice(0, 160) };
+    }
+  };
+}
+
 async function voteGemini(content) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return { status: 'not_connected' };
@@ -290,8 +326,8 @@ module.exports = async function handler(req, res) {
   //  - OpenAI: the web-search-enabled model variant.
   //  - Grok: xAI Live Search via search_parameters.
   //  - Gemini: Google Search grounding (set in voteGemini).
-  const voteGPT = await voteChat('https://api.openai.com/v1/chat/completions', process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL || 'gpt-4o-search-preview', { web_search_options: {} });
-  const voteGrok = await voteChat('https://api.x.ai/v1/chat/completions', process.env.XAI_API_KEY, process.env.XAI_MODEL || 'grok-3', { search_parameters: { mode: 'auto' } });
+  const voteGPT = voteResponses('https://api.openai.com/v1/responses', process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL || 'gpt-4o');
+  const voteGrok = voteResponses('https://api.x.ai/v1/responses', process.env.XAI_API_KEY, process.env.XAI_MODEL || 'grok-4');
   const claudeP = callClaude(content, key, model);
   const votersP = readAiEnabled().then((aiOn) => Promise.all([
     aiOn.gpt4o !== false ? voteGPT(content) : Promise.resolve(off),
