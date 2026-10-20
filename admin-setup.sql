@@ -34,7 +34,7 @@ security definer
 set search_path = public
 as $$
 declare
-  is_admin boolean := (auth.jwt() ->> 'email') in ('rehan.waris@gmail.com');
+  is_admin boolean := coalesce(auth.jwt() ->> 'email', '') = 'rehan.waris@gmail.com';
 begin
   if not is_admin then
     return jsonb_build_object('error', 'not_authorized');
