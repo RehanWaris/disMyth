@@ -102,6 +102,21 @@ AUTH_SCRIPT = '''<script>
     function attempt(type){ return fetch(SB+'/auth/v1/verify',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({type:type,email:email,token:(code||'').replace(/\\s/g,'')})}).then(function(r){return r.json();}); }
     return attempt('email').then(function(d){ if(apply(d)) return true; return attempt('signup').then(apply); }).catch(function(){ return false; });
   };
+  dm.authPw=function(email,pw){
+    function setSess(d){ dm.session={ access_token:d.access_token, refresh_token:d.refresh_token||'', email:jwt(d.access_token,'email'), user_id:jwt(d.access_token,'sub') }; dm.email=dm.session.email; try{ localStorage.setItem(LS,JSON.stringify(dm.session)); }catch(e){} }
+    function signin(){ return fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,password:pw})}).then(function(r){return r.json();}); }
+    function signup(){ return fetch(SB+'/auth/v1/signup',{method:'POST',headers:{'content-type':'application/json',apikey:KEY},body:JSON.stringify({email:email,password:pw})}).then(function(r){return r.json();}); }
+    return signin().then(function(d){
+      if(d&&d.access_token){ setSess(d); return {ok:true}; }
+      return signup().then(function(s){
+        if(s&&s.access_token){ setSess(s); return {ok:true}; }
+        var msg=(s&&(s.msg||s.error_description||s.error))||'';
+        if(/registered|already|exists/i.test(msg)) return {ok:false,error:'Wrong password for this email.'};
+        if(s&&s.id&&!s.access_token) return {ok:false,error:'Almost there — email confirmation is on. We can turn it off so you sign in instantly.'};
+        return {ok:false,error: msg || 'Could not sign in.'};
+      });
+    }).catch(function(){ return {ok:false,error:'Network error — please try again.'}; });
+  };
   dm.oauth=function(p){ location.href=SB+'/auth/v1/authorize?provider='+p+'&redirect_to='+encodeURIComponent(location.origin+'/app.html'); };
   dm.signOut=function(){ dm.session=null; dm.email=''; try{ localStorage.removeItem(LS); }catch(e){} };
   dm.saveProfile=function(f){ if(!dm.session) return Promise.resolve(false); return fetch(SB+'/rest/v1/profiles?id=eq.'+dm.session.user_id,{method:'PATCH',headers:{'content-type':'application/json',apikey:KEY,authorization:'Bearer '+dm.session.access_token,prefer:'return=minimal'},body:JSON.stringify(f)}).then(function(r){return r.ok;}).catch(function(){return false;}); };
