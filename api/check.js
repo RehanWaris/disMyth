@@ -42,9 +42,10 @@ const SYSTEM_PROMPT =
 
 // Lightweight prompt for the cross-checking voters — just a verdict + confidence.
 const VOTER_PROMPT =
-  'You are a neutral, non-partisan fact-checking model. Assess the claim and ' +
-  'respond with ONLY minified JSON, no other text: {"verdict":"True|False|' +
-  'Misleading|Unverified","confidence":<integer 0-100>}. If unsure, use "Unverified".';
+  'You are a neutral, non-partisan fact-checking model with live web access. ' +
+  'Check the claim against current, reliable web sources, then respond with ONLY ' +
+  'minified JSON, no other text: {"verdict":"True|False|Misleading|Unverified",' +
+  '"confidence":<integer 0-100>}. If unsure, use "Unverified".';
 
 function firstJsonObject(text) {
   const s = String(text || '');
@@ -130,22 +131,23 @@ async function callClaude(content, key, model) {
 }
 
 // Generic OpenAI-compatible voter (used for GPT-4o and Grok).
-async function voteChat(url, key, model) {
+async function voteChat(url, key, model, extra) {
   return async function (content) {
     if (!key) return { status: 'not_connected' };
     try {
+      const body = Object.assign({
+        model,
+        max_tokens: 700,
+        messages: [
+          { role: 'system', content: VOTER_PROMPT },
+          { role: 'user', content },
+        ],
+      }, extra || {});
       const r = await fetchTO(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + key },
-        body: JSON.stringify({
-          model,
-          max_tokens: 200,
-          messages: [
-            { role: 'system', content: VOTER_PROMPT },
-            { role: 'user', content },
-          ],
-        }),
-      }, 20000);
+        body: JSON.stringify(body),
+      }, 28000);
       if (!r.ok) return { status: 'error' };
       const d = await r.json();
       const t = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
@@ -172,9 +174,13 @@ async function voteGemini(content) {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: VOTER_PROMPT }] },
         contents: [{ role: 'user', parts: [{ text: content }] }],
-        generationConfig: { maxOutputTokens: 512, responseMimeType: 'application/json' },
+        // Ground Gemini with live Google Search. (responseMimeType JSON is
+        // dropped — it cannot combine with the search tool; firstJsonObject
+        // extracts the verdict JSON from the grounded reply.)
+        tools: [{ google_search: {} }],
+        generationConfig: { maxOutputTokens: 900 },
       }),
-    }, 20000);
+    }, 28000);
     if (!r.ok) return { status: 'error' };
     const d = await r.json();
     // Newer (thinking) models can split the reply across parts — join all text.
@@ -280,8 +286,12 @@ module.exports = async function handler(req, res) {
   // (voters assess the raw claim independently), so total latency is the slowest
   // single model, not the sum. Voter set honours the admin on/off toggles.
   const off = { status: 'off' };
-  const voteGPT = await voteChat('https://api.openai.com/v1/chat/completions', process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL || 'gpt-4o');
-  const voteGrok = await voteChat('https://api.x.ai/v1/chat/completions', process.env.XAI_API_KEY, process.env.XAI_MODEL || 'grok-3');
+  // All voters search the live web too (max-verification mode):
+  //  - OpenAI: the web-search-enabled model variant.
+  //  - Grok: xAI Live Search via search_parameters.
+  //  - Gemini: Google Search grounding (set in voteGemini).
+  const voteGPT = await voteChat('https://api.openai.com/v1/chat/completions', process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL || 'gpt-4o-search-preview', { web_search_options: {} });
+  const voteGrok = await voteChat('https://api.x.ai/v1/chat/completions', process.env.XAI_API_KEY, process.env.XAI_MODEL || 'grok-3', { search_parameters: { mode: 'auto' } });
   const claudeP = callClaude(content, key, model);
   const votersP = readAiEnabled().then((aiOn) => Promise.all([
     aiOn.gpt4o !== false ? voteGPT(content) : Promise.resolve(off),
