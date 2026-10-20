@@ -358,13 +358,6 @@ module.exports = async function handler(req, res) {
   add('Grok', grok);
   add('Gemini', gem);
 
-  // TEMP diagnostic: record why any voter did not appear.
-  const vdbg = [];
-  [['GPT-4o', gpt], ['Grok', grok], ['Gemini', gem]].forEach(([n, r]) => {
-    if (!r || r.status) vdbg.push(n + '=' + ((r && (r.detail || r.status)) || 'missing'));
-  });
-  if (vdbg.length) verdict._voteDebug = vdbg.join(' || ');
-
   verdict.consensus = { models };
   await saveCheck(verdict, claim, (body.region || '').toString().slice(0, 120));
   return json(200, verdict);
