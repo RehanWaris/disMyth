@@ -173,7 +173,7 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 </div>
 <div class="dm-body" style="flex:1;overflow:auto;padding:6px 20px 96px">
 <div onClick="{{ openOnboarding }}" style="display:flex;align-items:center;gap:11px;background:#12151b;border:1px solid oklch(0.72 0.15 145 / .35);border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer"><span style="font:16px">◇</span><div style="flex:1"><div style="font:600 13px Space Grotesk;color:#f2f5f9">Personalize your feed <span style="font:700 8px JetBrains Mono;color:#04140b;background:oklch(0.80 0.13 80);padding:2px 5px;border-radius:5px;vertical-align:middle;margin-left:2px">DisMyth+ · PRO</span></div><div style="font:11px Inter;color:#8a93a0;margin-top:2px">Custom topics &amp; area alerts — a DisMyth+ / Pro feature</div></div><span style="font:600 14px Inter;color:oklch(0.82 0.12 150)">→</span></div>
-<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px;margin-bottom:10px">// SAMPLE VERDICTS · illustrative examples</div>
+<div style="font:10px JetBrains Mono;color:oklch(0.60 0.21 25);letter-spacing:2px;margin-bottom:10px">// RECENT LIES DISMISSED · live, worldwide</div>
 <div style="display:flex;flex-direction:column;gap:11px">
 <sc-for list="{{ feed }}" as="c" hint-placeholder-count="4">
 <div onClick="{{ c.open }}" style="background:#12151b;border:1px solid #1c2128;border-radius:15px;padding:14px;cursor:pointer">
@@ -182,10 +182,18 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div style="font:10px JetBrains Mono;color:#5a626f">{{ c.conf }}%</div>
 </div>
 <div style="margin-top:11px;font:500 13.5px/1.4 Space Grotesk;color:#eef1f6">{{ c.claim }}</div>
-<div style="margin-top:10px;display:flex;align-items:center;gap:8px;font:10.5px JetBrains Mono;color:#5a626f">◎ {{ c.location }}<span style="color:#333a44">·</span>{{ c.time }}</div>
+<div style="margin-top:10px;display:flex;align-items:center;gap:8px;font:10.5px JetBrains Mono;color:#5a626f">◎ {{ c.location }}<span style="color:#333a44">·</span>{{ c.time }}<span style="color:#333a44">·</span>{{ c.agreeText }}</div>
 </div>
 </sc-for>
 </div>
+<sc-if value="{{ noRecent }}" hint-placeholder-val="{{ false }}">
+<div style="background:#12151b;border:1px solid #1c2128;border-radius:15px;padding:22px 16px;text-align:center">
+<div style="font:24px">🛡️</div>
+<div style="font:600 14px Space Grotesk;color:#eef1f6;margin-top:10px">No lies dismissed yet</div>
+<div style="font:12px/1.5 Inter;color:#8a93a0;margin-top:6px">Checks run here show up as they happen, worldwide. Be the first — check a claim.</div>
+<div onClick="{{ openSubmit }}" style="margin-top:16px;display:inline-block;cursor:pointer;font:700 12px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:11px;padding:11px 20px">Check a claim →</div>
+</div>
+</sc-if>
 </div>
 </div>
 </sc-if>
@@ -857,6 +865,55 @@ class Component extends DCLogic {
       .catch(function () {});
   }
 
+  // Approximate the city from IP on first open (no permission prompt). Precise
+  // GPS still available on tapping the chip (detectLocation). Runs once.
+  autoLocate() {
+    if (this.state.reg.region || this._autoLoc) return;
+    this._autoLoc = true;
+    this.setState({ geoStatus: 'locating' });
+    fetch('https://ipwho.is/')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d && d.success && (d.city || d.region)) {
+          const place = [d.city, d.region].filter(Boolean).join(', ');
+          this.setState((s) => ({ reg: { ...s.reg, region: place }, geoStatus: 'done' }));
+        } else { this.setState({ geoStatus: '' }); }
+      })
+      .catch(() => this.setState({ geoStatus: '' }));
+  }
+
+  // Real "recent lies dismissed" feed — recent False/Misleading checks run by
+  // anyone, anywhere (public, read via a SECURITY DEFINER function).
+  loadRecent() {
+    if (this._recentLoading) return;
+    this._recentLoading = true;
+    var SB = 'https://lrauoqykwgwhxxhpffzf.supabase.co';
+    var KEY = 'sb_publishable_FrH0thOASEhj0-5pczDPVQ_tYiNBGDS';
+    fetch(SB + '/rest/v1/rpc/recent_checks', { method: 'POST', headers: { 'content-type': 'application/json', apikey: KEY, authorization: 'Bearer ' + KEY }, body: '{}' })
+      .then(function (r) { return r.json(); })
+      .then((d) => { if (Array.isArray(d)) this.setState({ recentFeed: d }); })
+      .catch(function () {})
+      .then(() => { this._recentLoading = false; });
+  }
+
+  timeAgo(iso) {
+    try {
+      var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      return Math.floor(s / 86400) + 'd ago';
+    } catch (e) { return ''; }
+  }
+
+  openRecent(c) {
+    var claim = Object.assign({}, c, {
+      consensus: (c.models && c.models.length) ? { models: c.models } : null,
+      checks: (c.checks && c.checks.length) ? c.checks : ['Verified against live web sources by DisMyth’s multi-AI check.'],
+    });
+    this.setState({ screen: 'verdict', selectedId: 'api', apiClaim: claim });
+  }
+
   detectLocation() {
     if (this.state.geoStatus === 'locating') return;
     if (!navigator.geolocation) { this.setState({ geoStatus: 'unsupported' }); return; }
@@ -915,7 +972,7 @@ class Component extends DCLogic {
     if (!window.claude || !window.claude.complete) {
       this.setState({ screen: 'checking' }); this.beginCheck();
       try {
-        const r = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, claim: claim }) });
+        const r = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, claim: claim, region: (this.state.reg && this.state.reg.region) || '' }) });
         if (!r.ok) throw new Error('http ' + r.status);
         const j = await r.json();
         this.setState({ apiClaim: j, selectedId: 'api', screen: 'verdict' });
@@ -941,7 +998,14 @@ class Component extends DCLogic {
 
   renderVals() {
     const S = this.state;
+    // Once, on first render: approximate location + load the live feed.
+    if (!this._booted) { this._booted = true; setTimeout(() => { this.autoLocate(); this.loadRecent(); }, 0); }
     const list = this.claims();
+    const recentFeed = (S.recentFeed || []).map((c) => {
+      const base = { id: c.id, verdict: c.verdict, confidence: c.confidence, claim: c.claim, evidence: c.evidence, checks: c.checks, models: c.models, location: (c.region || 'Worldwide'), time: this.timeAgo(c.created_at), consensus: (c.models && c.models.length) ? { models: c.models } : null };
+      const d = this.decorate(base);
+      return { ...d, open: () => this.openRecent(base) };
+    });
     const showExplainers = this.props.showExplainers ?? true;
     const showWeights = this.props.showWeights ?? true;
     const sel = this.decorate(S.selectedId === 'api' && S.apiClaim ? S.apiClaim : (list.find(c => c.id === S.selectedId) || list[0]));
@@ -1057,8 +1121,10 @@ class Component extends DCLogic {
       radar, corrections, accuracy: '—', medianTime: '~10s', checked30d: '0', correctionsCount: '0',
       isOnboard: S.screen === 'onboarding', isFeed: S.screen === 'feed', isMap: S.screen === 'map', isAlerts: S.screen === 'alerts', isAccount: S.screen === 'account', isSubmit: S.screen === 'submit', isChecking: S.screen === 'checking', isVerdict: S.screen === 'verdict', isCompose: S.screen === 'compose', isCompare: S.screen === 'compare', isTopicsMgr: S.screen === 'topics', isAlertRules: S.screen === 'alertrules', isMonitor: S.screen === 'monitor', isTeam: S.screen === 'team', isError: S.screen === 'error', errorMsg: S.errorMsg || 'Please check your connection and try again in a moment.',
       showNav: nav.includes(S.screen),
-      region: (S.reg.region && S.reg.region.split(',')[0]) || 'Tamil Nadu',
-      feed: list.map(c => { const d = this.decorate(c); return { ...d, open: () => this.openVerdict(c.id) }; }),
+      region: (S.reg.region && S.reg.region.split(',')[0]) || (S.geoStatus === 'locating' ? 'Locating…' : 'Your area'),
+      feed: recentFeed,
+      noRecent: recentFeed.length === 0,
+      recentCount: recentFeed.length,
       sel, selApi: S.selectedId === 'api',
       platforms, activeGlyphs, activeCount: activeGlyphs.length,
       published: S.published, notPublished: !S.published,
