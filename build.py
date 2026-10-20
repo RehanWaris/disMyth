@@ -163,7 +163,7 @@ def rewrite_links(html):
 # "Verify now" to the /api/check serverless function instead of the placeholder.
 # Whitespace-robust: locate the exact demo branch by structure, then replace it.
 RUNCHECK_NEW = r'''if (!window.claude || !window.claude.complete) {
-      this.setState({ screen: 'checking' });
+      this.setState({ screen: 'checking' }); this.beginCheck();
       try {
         const r = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, claim: claim }) });
         if (!r.ok) throw new Error('http ' + r.status);
