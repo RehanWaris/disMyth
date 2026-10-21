@@ -48,8 +48,24 @@
   .who{font-size:.85rem;color:var(--muted)}
   .who b{color:var(--text)}
 
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
   @media(max-width:560px){.grid{grid-template-columns:1fr 1fr}}
+  .an-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.an-two{grid-template-columns:1fr}}
+  .an-two h2{font-size:.95rem;margin:0 0 10px}
+  .note{font-size:.8rem;color:var(--muted);line-height:1.5;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px}
+  .bars{display:flex;flex-direction:column;gap:9px}
+  .barrow{display:grid;grid-template-columns:76px 1fr 34px;align-items:center;gap:10px;font-size:.82rem}
+  .barrow .lab{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem}
+  .barrow .track{height:8px;background:var(--surface2);border-radius:5px;overflow:hidden}
+  .barrow .fill{height:100%;background:var(--accent);border-radius:5px}
+  .barrow .val{text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-size:.8rem}
+  .day{display:grid;grid-template-columns:1fr;gap:3px;text-align:center}
+  .daybars{display:flex;align-items:flex-end;gap:5px;height:88px}
+  .daybars .d{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+  .daybars .b{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px}
+  .daybars .dn{font-size:.58rem;color:var(--faint);font-family:var(--mono)}
+  .daybars .dl{font-size:.5rem;color:var(--faint);font-family:var(--mono);white-space:nowrap}
   .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px}
   .stat .n{font-size:1.9rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-1px}
   .stat .c{font-family:var(--mono);font-size:.6rem;letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin-top:3px}
@@ -126,8 +142,28 @@
 
     <div class="grid">
       <div class="stat"><div class="n" id="s-total">—</div><div class="c">Total checks</div></div>
+      <div class="stat"><div class="n" id="s-7d">—</div><div class="c">Last 7 days</div></div>
       <div class="stat"><div class="n" id="s-30d">—</div><div class="c">Last 30 days</div></div>
       <div class="stat false"><div class="n" id="s-false">—</div><div class="c">False / misleading</div></div>
+    </div>
+
+    <div class="section">
+      <h2>Checks over time <span class="hint">last 14 days</span></h2>
+      <div class="card"><div id="an-day" class="bars"><div class="empty">Loading…</div></div></div>
+    </div>
+
+    <div class="section an-two">
+      <div>
+        <h2>Top cities <span class="hint">where checks come from</span></h2>
+        <div class="card" id="an-region"><div class="empty">Loading…</div></div>
+      </div>
+      <div>
+        <h2>Topics <span class="hint">auto-categorized</span></h2>
+        <div class="card" id="an-topic"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+    <div class="section" style="margin-top:-6px">
+      <div class="note">Demographics (age / gender) aren't collected yet — geography above is the closest signal. When you want deeper demographics we can ask for it at sign-up and add it here.</div>
     </div>
 
     <div class="section">
@@ -214,6 +250,17 @@
     fetch(SB+'/rest/v1/rpc/ledger_stats',{method:'POST',headers:{apikey:KEY,authorization:'Bearer '+KEY,'content-type':'application/json'},body:'{}'})
       .then(function(r){return r.json();}).then(function(d){ var x=Array.isArray(d)?d[0]:d; if(x){ $('s-total').textContent=x.total_checks; $('s-30d').textContent=x.checks_30d; $('s-false').textContent=x.false_or_misleading; } }).catch(function(){});
 
+    // analytics (owner-only): over time, top cities, topics
+    fetch(SB+'/rest/v1/rpc/admin_analytics',{method:'POST',headers:authHeaders(),body:'{}'})
+      .then(function(r){return r.json();}).then(function(d){
+        if(!d || typeof d!=='object' || !('by_day' in d)){
+          var msg=(d&&d.error==='not_authorized')?'Not authorized.':'Run the analytics database step (admin-analytics-setup.sql) to turn this on.';
+          $('an-day').innerHTML='<div class="empty">'+msg+'</div>'; $('an-region').innerHTML='<div class="empty">—</div>'; $('an-topic').innerHTML='<div class="empty">—</div>'; return;
+        }
+        if(d.last_7!=null) $('s-7d').textContent=d.last_7;
+        paintDays(d.by_day||[]); paintBarsObj($('an-topic'), d.by_topic||{}); paintBarsArr($('an-region'), (d.by_region||[]).map(function(x){return {label:x.region,n:x.n};}));
+      }).catch(function(){ $('an-day').innerHTML='<div class="empty">Could not load analytics.</div>'; });
+
     // AI settings
     fetch(SB+'/rest/v1/app_settings?key=eq.ai_enabled&select=value',{headers:authHeaders()})
       .then(function(r){return r.json();}).then(function(rows){ if(rows&&rows[0]&&rows[0].value) aiState=Object.assign(aiState,rows[0].value); paintToggles(); }).catch(paintToggles);
@@ -247,6 +294,28 @@
       .catch(function(){ tMsg('Network error — not saved.',true); });
   };
   function tMsg(t,err){ var m=$('toggleMsg'); m.textContent=t||''; m.className='msg'+(err?' err':''); setTimeout(function(){ if(m.textContent===t) m.textContent=''; },4000); }
+
+  function paintDays(days){
+    if(!days.length){ $('an-day').innerHTML='<div class="empty">No checks in the last 14 days.</div>'; return; }
+    var max=Math.max.apply(null, days.map(function(x){return x.n;}).concat([1]));
+    var bars=days.map(function(x){
+      var h=Math.round(x.n/max*74);
+      return '<div class="d"><div class="dn">'+x.n+'</div><div class="b" style="height:'+(x.n?Math.max(h,3):0)+'px"></div><div class="dl">'+esc(String(x.d).replace(/^\w+ /,''))+'</div></div>';
+    }).join('');
+    $('an-day').innerHTML='<div class="daybars">'+bars+'</div>';
+  }
+  function paintBarsArr(el, rows){
+    if(!rows.length){ el.innerHTML='<div class="empty">No data yet.</div>'; return; }
+    var max=Math.max.apply(null, rows.map(function(x){return x.n;}).concat([1]));
+    el.innerHTML=rows.map(function(x){
+      var pct=Math.round(x.n/max*100);
+      return '<div class="barrow"><span class="lab">'+esc(x.label)+'</span><span class="track"><span class="fill" style="width:'+pct+'%"></span></span><span class="val">'+x.n+'</span></div>';
+    }).join('');
+  }
+  function paintBarsObj(el, obj){
+    var rows=Object.keys(obj).map(function(k){return {label:k,n:obj[k]};}).sort(function(a,b){return b.n-a.n;});
+    paintBarsArr(el, rows);
+  }
 
   function paintBreakdown(by){
     var keys=Object.keys(by); if(!keys.length){ $('breakdown').innerHTML='<div class="empty">No checks recorded yet.</div>'; return; }
