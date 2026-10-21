@@ -359,9 +359,11 @@ def build():
     os.makedirs(os.path.join(DIST, "api"), exist_ok=True)
     shutil.copyfile(os.path.join(HERE, "api", "check.js"),
                     os.path.join(DIST, "api", "check.js"))
-    open(os.path.join(DIST, ".env.example"), "w", encoding="utf-8").write(ENV_EXAMPLE)
-    open(os.path.join(DIST, "DEPLOY-VERIFY.md"), "w", encoding="utf-8").write(DEPLOY_VERIFY)
-    print("  + api/check.js, .env.example, DEPLOY-VERIFY.md")
+    # Dev docs live at the repo root for reference — NOT inside dist/, so they
+    # are never served publicly on the live site.
+    open(os.path.join(HERE, ".env.example"), "w", encoding="utf-8").write(ENV_EXAMPLE)
+    open(os.path.join(HERE, "DEPLOY-VERIFY.md"), "w", encoding="utf-8").write(DEPLOY_VERIFY)
+    print("  + api/check.js (dev docs written to repo root, not dist)")
 
     # 404
     open(os.path.join(DIST, "404.html"), "w", encoding="utf-8").write(NOT_FOUND)
