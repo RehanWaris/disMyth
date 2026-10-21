@@ -148,6 +148,10 @@
     </div>
 
     <div class="section">
+      <div class="card" id="usage"><div class="empty">Loading usage…</div></div>
+    </div>
+
+    <div class="section">
       <h2>Checks over time <span class="hint">last 14 days</span></h2>
       <div class="card"><div id="an-day" class="bars"><div class="empty">Loading…</div></div></div>
     </div>
@@ -258,6 +262,7 @@
           $('an-day').innerHTML='<div class="empty">'+msg+'</div>'; $('an-region').innerHTML='<div class="empty">—</div>'; $('an-topic').innerHTML='<div class="empty">—</div>'; return;
         }
         if(d.last_7!=null) $('s-7d').textContent=d.last_7;
+        paintUsage(d.today||0, (d.caps&&d.caps.global_day)||100);
         paintDays(d.by_day||[]); paintBarsObj($('an-topic'), d.by_topic||{}); paintBarsArr($('an-region'), (d.by_region||[]).map(function(x){return {label:x.region,n:x.n};}));
       }).catch(function(){ $('an-day').innerHTML='<div class="empty">Could not load analytics.</div>'; });
 
@@ -294,6 +299,24 @@
       .catch(function(){ tMsg('Network error — not saved.',true); });
   };
   function tMsg(t,err){ var m=$('toggleMsg'); m.textContent=t||''; m.className='msg'+(err?' err':''); setTimeout(function(){ if(m.textContent===t) m.textContent=''; },4000); }
+
+  function paintUsage(today, cap){
+    var pct=cap?Math.min(100,Math.round(today/cap*100)):0;
+    var near = today >= cap*0.8 && today < cap;
+    var full = today >= cap;
+    var color = full ? 'var(--red)' : (near ? 'var(--amber)' : 'var(--green)');
+    var note = full ? '⚠ Daily limit reached — new checks are paused until tomorrow.'
+      : near ? '⚠ Getting close to today’s limit ('+today+' of '+cap+').'
+      : 'Well within today’s limit.';
+    $('usage').innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">'+
+        '<div style="font-weight:600;font-size:.95rem">Today’s usage</div>'+
+        '<div style="font-variant-numeric:tabular-nums;font-weight:700;color:'+color+'">'+today+' <span style="color:var(--faint);font-weight:400">/ '+cap+' checks</span></div>'+
+      '</div>'+
+      '<div style="height:9px;background:var(--surface2);border-radius:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:6px"></div></div>'+
+      '<div style="margin-top:9px;font-size:.8rem;color:'+(near||full?color:'var(--muted)')+'">'+note+'</div>'+
+      '<div style="margin-top:4px;font-size:.74rem;color:var(--faint)">Limit: 5 checks per person/day · '+cap+' total/day. Tell your developer to adjust.</div>';
+  }
 
   function paintDays(days){
     if(!days.length){ $('an-day').innerHTML='<div class="empty">No checks in the last 14 days.</div>'; return; }

@@ -15,6 +15,8 @@ begin
   end if;
   return jsonb_build_object(
     'total',   (select count(*) from public.checks),
+    'today',   (select count(*) from public.checks where created_at > now() - interval '24 hours'),
+    'caps',    jsonb_build_object('global_day', 100, 'per_user_day', 5),
     'last_7',  (select count(*) from public.checks where created_at > now() - interval '7 days'),
     'last_30', (select count(*) from public.checks where created_at > now() - interval '30 days'),
     'by_verdict', (

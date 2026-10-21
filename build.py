@@ -180,7 +180,7 @@ def rewrite_links(html):
 RUNCHECK_NEW = r'''if (!window.claude || !window.claude.complete) {
       this.setState({ screen: 'checking' }); this.beginCheck();
       try {
-        const r = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, claim: claim, region: (this.state.reg && this.state.reg.region) || '' }) });
+        const r = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, claim: claim, region: (this.state.reg && this.state.reg.region) || '', uid: (window.dm && window.dm.session && window.dm.session.user_id) || '' }) });
         if (!r.ok) throw new Error('http ' + r.status);
         const j = await r.json();
         this.setState({ apiClaim: j, selectedId: 'api', screen: 'verdict' });

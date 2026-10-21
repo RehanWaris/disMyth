@@ -253,8 +253,8 @@ async function readAiEnabled() {
 // Each check calls 4 paid AIs + web search, so an open endpoint can drain the
 // wallet. Two caps, both best-effort (fail OPEN so a DB hiccup never blocks
 // real users): per-IP per hour, and a global per-day safety net.
-const PER_IP_HOUR = 15;     // max checks per visitor per hour
-const GLOBAL_DAY = 400;     // max successful checks per day (wallet safety net)
+const PER_KEY_DAY = 5;      // max checks per visitor (login if signed-in, else IP) per 24h
+const GLOBAL_DAY = 100;     // max successful checks per day (wallet safety net)
 
 function restBase() { const u = process.env.SUPABASE_URL; return u ? u.replace(/\/+$/, '') : ''; }
 function svcHeaders() { const k = process.env.SUPABASE_SERVICE_ROLE_KEY; return { apikey: k, authorization: 'Bearer ' + k }; }
@@ -264,23 +264,28 @@ async function countSince(path) {
   return parseInt((cr.split('/')[1] || '0'), 10) || 0;
 }
 // Returns a reason string if the request should be refused, else ''.
-async function abuseBlock(ip) {
+// Limits: global 100/day; per identity 5/24h — keyed by login (uid) when signed
+// in, AND by IP (the IP cap is the backstop that stops uid-spoofing and multi-
+// account abuse). Best-effort: fails OPEN so a DB hiccup never blocks real users.
+async function abuseBlock(ip, uid) {
   const base = restBase(), key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!base || !key) return '';
+  const dayAgo = new Date(Date.now() - 86400e3).toISOString();
+  const quota = 'You’ve used your 5 free checks for the day. Please come back tomorrow.';
   try {
-    const dayAgo = new Date(Date.now() - 86400e3).toISOString();
     if (await countSince('/rest/v1/checks?select=id&created_at=gte.' + dayAgo) >= GLOBAL_DAY) {
       return 'DisMyth is at today’s free capacity. Please try again tomorrow.';
     }
-    if (ip) {
-      const hourAgo = new Date(Date.now() - 3600e3).toISOString();
-      if (await countSince('/rest/v1/rate_limits?select=id&ip=eq.' + encodeURIComponent(ip) + '&ts=gte.' + hourAgo) >= PER_IP_HOUR) {
-        return 'You’ve reached the limit of checks for this hour. Please try again a little later.';
-      }
-      fetchTO(base + '/rest/v1/rate_limits', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json', prefer: 'return=minimal' }, svcHeaders()), body: JSON.stringify({ ip: ip }) }, 5000).catch(() => {});
-      // occasional cleanup so the table never grows unbounded
-      if (Math.random() < 0.03) fetchTO(base + '/rest/v1/rate_limits?ts=lt.' + new Date(Date.now() - 7200e3).toISOString(), { method: 'DELETE', headers: Object.assign({ prefer: 'return=minimal' }, svcHeaders()) }, 5000).catch(() => {});
+    const keys = [];
+    if (uid) keys.push('uid:' + uid);
+    if (ip) keys.push(ip);
+    for (const k of keys) {
+      if (await countSince('/rest/v1/rate_limits?select=id&ip=eq.' + encodeURIComponent(k) + '&ts=gte.' + dayAgo) >= PER_KEY_DAY) return quota;
     }
+    keys.forEach(function (k) {
+      fetchTO(base + '/rest/v1/rate_limits', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json', prefer: 'return=minimal' }, svcHeaders()), body: JSON.stringify({ ip: k }) }, 5000).catch(() => {});
+    });
+    if (Math.random() < 0.03) fetchTO(base + '/rest/v1/rate_limits?ts=lt.' + new Date(Date.now() - 90000e3).toISOString(), { method: 'DELETE', headers: Object.assign({ prefer: 'return=minimal' }, svcHeaders()) }, 5000).catch(() => {});
     return '';
   } catch { return ''; }
 }
@@ -341,10 +346,11 @@ module.exports = async function handler(req, res) {
   const claim = (body.claim || '').toString().trim().slice(0, 1000);
   if (!content) return json(400, { error: 'content is required.' });
 
-  // Abuse / cost guard (per-IP per hour + global per day).
+  // Abuse / cost guard: 5/day per login-or-IP, plus a global 100/day.
   const ip = (req.headers['x-forwarded-for'] || '').toString().split(',')[0].trim()
     || (req.socket && req.socket.remoteAddress) || '';
-  const blocked = await abuseBlock(ip);
+  const uid = (body.uid || '').toString().slice(0, 64);
+  const blocked = await abuseBlock(ip, uid);
   if (blocked) {
     return json(200, { verdict: 'Unverified', confidence: 0, claim: claim || 'Submitted item', checks: [blocked], origin: 'Rate limit', evidence: [] });
   }
