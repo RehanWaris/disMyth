@@ -576,12 +576,12 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div style="margin-top:10px;font:11.5px/1.4 Inter;color:#c4ccd6"><b style="color:#eef1f6">{{ sel.bias.leaning }}.</b> {{ sel.bias.note }}</div>
 </div>
 
-<div style="margin-top:18px;display:flex;gap:10px">
-<div onClick="{{ openCompose }}" style="flex:1;text-align:center;font:700 13px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:13px;cursor:pointer">⇄ Broadcast fact</div>
-<div onClick="{{ shareVerdict }}" style="width:48px;text-align:center;font:15px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:12px 0;cursor:pointer">↗</div>
+<div onClick="{{ shareVerdict }}" style="margin-top:18px;text-align:center;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:12px;padding:14px;cursor:pointer">{{ shareBtnLabel }}</div>
+<div style="margin-top:7px;text-align:center;font:10.5px/1.45 Inter;color:#8a93a0">Caught a lie? Send it to the group before they forward it.</div>
+<div style="margin-top:12px;display:flex;gap:10px">
+<div onClick="{{ openCompose }}" style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:12px;cursor:pointer">⇄ Broadcast · PRO</div>
+<div onClick="{{ openDispute }}" style="flex:1;text-align:center;font:600 12px Inter;color:#c4ccd6;background:#12151b;border:1px solid #262c34;border-radius:12px;padding:12px;cursor:pointer">⚑ Dispute</div>
 </div>
-<div onClick="{{ openDispute }}" style="margin-top:9px;text-align:center;font:600 11.5px Inter;color:#c4ccd6;border:1px solid #262c34;border-radius:12px;padding:11px;cursor:pointer">⚑ Dispute · request human review</div>
-<div style="margin-top:9px;text-align:center;font:10px/1.4 JetBrains Mono;color:#5a626f">Broadcasting is a Pro feature · high-stakes claims need human sign-off</div>
 </div>
 </div>
 </sc-if>
@@ -960,12 +960,12 @@ class Component extends DCLogic {
     const S = this.state;
     const list = this.claims();
     const sel = this.decorate(S.selectedId === 'api' && S.apiClaim ? S.apiClaim : (list.find((c) => c.id === S.selectedId) || list[0]));
-    const text = 'DisMyth fact-check — Verdict: ' + sel.label + ' (' + sel.conf + '%). Claim: "' + sel.claim + '". Checked on dismyth.app';
+    const text = '🔍 DisMyth verdict: ' + sel.label + ' (' + sel.conf + '%) — "' + sel.claim + '". Cross-checked by 4 AIs + live web sources. Check any claim free:';
     const url = 'https://dismyth.app';
     if (navigator.share) {
-      navigator.share({ title: 'DisMyth', text: text, url: url }).catch(() => {});
+      navigator.share({ title: 'DisMyth — Dismiss the lie', text: text, url: url }).catch(() => {});
     } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(text + ' — ' + url).then(() => this.setState({ shareCopied: true })).catch(() => {});
+      navigator.clipboard.writeText(text + ' ' + url).then(() => { this.setState({ shareCopied: true }); setTimeout(() => this.setState({ shareCopied: false }), 2200); }).catch(() => {});
     }
   }
 
@@ -1182,7 +1182,7 @@ class Component extends DCLogic {
       openSubmit: () => this.setState({ screen: 'submit' }), runCheck: () => this.runCheck(), openOnboarding: () => this.setState({ screen: 'onboarding', step: 0 }),
       detectLocation: () => this.detectLocation(),
       ledgerTotal: (S.ledgerTotal != null ? S.ledgerTotal : '0'), ledger30d: (S.ledger30d != null ? S.ledger30d : '0'), ledgerFalse: (S.ledgerFalse != null ? S.ledgerFalse : '0'),
-      shareVerdict: () => this.shareVerdict(), shareCopied: S.shareCopied,
+      shareVerdict: () => this.shareVerdict(), shareCopied: S.shareCopied, shareBtnLabel: S.shareCopied ? 'Copied — paste it to share ✓' : '↗ Share this verdict',
       shareApp: () => this.shareApp(), inviteLabel: S.inviteCopied ? 'Link copied — paste it to your friends ✓' : 'Help stop fake news — share the app',
       isSignedIn: !!(window.dm && window.dm.session), notSignedIn: !(window.dm && window.dm.session), userEmail: (window.dm && window.dm.email) || '',
       authStatus: S.authBusy ? 'Signing you in…' : (S.authMsg || ''),
