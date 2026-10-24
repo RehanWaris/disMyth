@@ -833,7 +833,23 @@ class Component extends DCLogic {
   pickLink() { this.setState(s => ({ attachType: s.attachType === 'link' ? 'text' : 'link' })); }
   pickPhoto() { this.setState({ attachType: 'photo' }); setTimeout(() => { if (this.photoRef.current) this.photoRef.current.click(); }, 0); }
   pickVideo() { this.setState({ attachType: 'video' }); setTimeout(() => { if (this.videoRef.current) this.videoRef.current.click(); }, 0); }
-  onPhoto(e) { const f = e.target.files && e.target.files[0]; if (!f) return; this.setState({ attachType: 'photo', fileName: f.name, fileIsImage: true, fileUrl: URL.createObjectURL(f) }); }
+  onPhoto(e) {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const url = URL.createObjectURL(f);
+    this.setState({ attachType: 'photo', fileName: f.name, fileIsImage: true, fileUrl: url, fileData: '' });
+    // Downscale to <=1024px and store as JPEG base64 so Claude can actually SEE it.
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const max = 1024; let w = img.width, h = img.height;
+        if (w > max || h > max) { const s = max / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        this.setState({ fileData: cv.toDataURL('image/jpeg', 0.82) });
+      } catch (err) { /* if canvas fails, fall back to claim-only */ }
+    };
+    img.src = url;
+  }
   onVideo(e) { const f = e.target.files && e.target.files[0]; if (!f) return; this.setState({ attachType: 'video', fileName: f.name, fileIsImage: false, fileUrl: '' }); }
   clearFile() { this.setState({ fileName: '', fileUrl: '', fileIsImage: false, attachType: 'text' }); }
   set(path, v) { this.setState(s => ({ reg: { ...s.reg, [path]: v } })); }
@@ -987,14 +1003,14 @@ class Component extends DCLogic {
     const claim = (S.submitText || '').trim();
     const at = S.attachType;
     let content = claim, hasInput = !!claim;
-    if (at === 'link') { hasInput = !!(S.linkUrl || claim); content = 'The user submitted a LINK to fact-check. URL: ' + (S.linkUrl || '(none)') + '. Stated claim/caption: ' + (claim || '(none)') + '. Assess the underlying claim.'; }
-    else if (at === 'photo') { hasInput = !!(S.fileName || claim); content = 'The user submitted a PHOTO ("' + (S.fileName || 'image') + '") to fact-check. Stated claim/caption: ' + (claim || '(none)') + '. You cannot see the image; assess the stated claim, and if the verdict depends on unseen image content return Unverified and note that reverse-image forensics is required.'; }
-    else if (at === 'video') { hasInput = !!(S.fileName || claim); content = 'The user submitted a VIDEO ("' + (S.fileName || 'video') + '") to fact-check. Stated claim/caption: ' + (claim || '(none)') + '. You cannot watch the video; assess the stated claim, and if the verdict depends on unseen footage return Unverified and note that video forensics is required.'; }
+    if (at === 'link') { hasInput = !!(S.linkUrl || claim); content = 'Fact-check the content at this LINK: ' + (S.linkUrl || claim) + '  Stated caption/claim: ' + (claim || '(none)') + '. Use web search to find and read what this page/post actually says, identify its main factual claim, and verify it against reliable sources. If the link is private or login-walled (e.g. a logged-in Instagram/Facebook post) and its content cannot be accessed, return Unverified and clearly say the post could not be opened — suggest the user paste the text or upload a screenshot.'; }
+    else if (at === 'photo') { hasInput = !!(S.fileName || S.fileData || claim); content = 'Fact-check the attached IMAGE.' + (claim ? ' The user also says: "' + claim + '".' : '') + ' Describe what the image actually shows (including any text in it), identify the factual claim it makes or implies, and verify it against reliable web sources. Note clear signs of editing, AI-generation or out-of-context reuse if present.'; }
+    else if (at === 'video') { hasInput = !!(S.fileName || claim); content = 'The user submitted a VIDEO ("' + (S.fileName || 'video') + '") to fact-check. Stated claim/caption: ' + (claim || '(none)') + '. The video itself cannot be watched here — assess the stated claim with web search, and clearly note that the footage was not analyzed (suggest uploading a screenshot/key frame as an image for a visual check).'; }
     if (!hasInput) return;
     if (!window.claude || !window.claude.complete) {
       this.setState({ screen: 'checking' }); this.beginCheck();
       try {
-        const r = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, claim: claim, region: (this.state.reg && this.state.reg.region) || '', uid: (window.dm && window.dm.session && window.dm.session.user_id) || '' }) });
+        const r = await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, claim: claim, region: (this.state.reg && this.state.reg.region) || '', uid: (window.dm && window.dm.session && window.dm.session.user_id) || '', kind: this.state.attachType || 'text', image: (this.state.attachType === 'photo' && this.state.fileData) ? this.state.fileData : '' }) });
         if (!r.ok) throw new Error('http ' + r.status);
         const j = await r.json();
         this.setState({ apiClaim: j, selectedId: 'api', screen: 'verdict' });

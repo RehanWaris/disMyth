@@ -82,10 +82,23 @@ function webTools(model) {
   return [{ type: basic ? 'web_search_20250305' : 'web_search_20260209', name: 'web_search', max_uses: 3 }];
 }
 
-// Primary check: Claude, optionally grounded with live web search.
-async function callClaude(content, key, model) {
+// Pull a base64 image out of a data URL (returned by the app for photo checks).
+function parseImage(s) {
+  if (!s || typeof s !== 'string') return null;
+  const m = s.match(/^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/=]+)$/);
+  if (!m) return null;
+  if (m[2].length > 7000000) return null; // ~5MB cap
+  return { media_type: m[1], data: m[2] };
+}
+
+// Primary check: Claude, optionally grounded with live web search and/or given
+// an image to actually look at (vision).
+async function callClaude(content, key, model, image) {
   const tools = webTools(model);
-  let messages = [{ role: 'user', content }];
+  const userContent = image
+    ? [{ type: 'image', source: { type: 'base64', media_type: image.media_type, data: image.data } }, { type: 'text', text: content }]
+    : content;
+  let messages = [{ role: 'user', content: userContent }];
   let data;
   // Stay well under the 60s platform cap: give the whole Claude+search phase a
   // hard budget and abort rather than let it run into a 504.
@@ -368,6 +381,20 @@ module.exports = async function handler(req, res) {
       origin: 'Verification backend not configured',
       evidence: [],
     });
+  }
+
+  // Photo path: only Claude can see the image (vision). Analyze it directly;
+  // the text-only voters can't, so Claude is the sole verdict here.
+  const image = parseImage(body.image);
+  if (image) {
+    const cv = await callClaude(content, key, model, image);
+    if (!cv.ok) {
+      return json(200, { verdict: 'Unverified', confidence: 40, claim: claim || 'Submitted image', checks: ['Could not analyze the image just now — please try again in a moment.'], origin: 'Vision error', evidence: [], _debug: (String(cv.status) + ' ' + (cv.detail || '')).slice(0, 300) });
+    }
+    const vv = cv.obj;
+    vv.consensus = { models: [{ name: 'Claude Vision', live: true, verdict: vv.verdict, confidence: vv.confidence }] };
+    await saveCheck(vv, claim || vv.claim, (body.region || '').toString().slice(0, 120));
+    return json(200, vv);
   }
 
   // Run the primary Claude check AND the cross-checking voters at the same time
