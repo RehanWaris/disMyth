@@ -357,14 +357,15 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div class="dm-scr" style="background:#0c0e12">
 <div style="padding:40px 18px 10px;display:flex;align-items:center;gap:12px"><div onClick="{{ goFeed }}" style="font:16px Inter;cursor:pointer;color:#7a828f">✕</div><div style="font:700 15px Space Grotesk">Check a claim</div></div>
 <div class="dm-body" style="flex:1;overflow:auto;padding:10px 20px 30px">
-<div style="font:10px JetBrains Mono;color:#5a626f;letter-spacing:2px">// PASTE_TEXT_LINK_OR_UPLOAD</div>
-<textarea value="{{ submitText }}" onInput="{{ onSubmitText }}" placeholder="Paste a claim, or add a caption for your link / photo / video…" style="width:100%;box-sizing:border-box;margin-top:11px;background:#12151b;border:1px solid #262c34;border-radius:15px;padding:15px;min-height:165px;font:400 14px/1.5 Inter;color:#eef1f6;resize:none"></textarea>
-<div style="margin-top:13px;display:flex;gap:9px">
+<div style="font:600 14px Space Grotesk;color:#eef1f6">What do you want to check?</div>
+<textarea value="{{ submitText }}" onInput="{{ onSubmitText }}" placeholder="Type or paste anything — a message, a rumour, a WhatsApp forward…" style="width:100%;box-sizing:border-box;margin-top:11px;background:#12151b;border:1px solid #262c34;border-radius:15px;padding:15px;min-height:140px;font:400 14px/1.5 Inter;color:#eef1f6;resize:none"></textarea>
+<div style="margin-top:12px;font:11px Inter;color:#7a828f">…or attach something to check:</div>
+<div style="margin-top:8px;display:flex;gap:9px">
+<div onClick="{{ pickPhoto }}" style="flex:1;text-align:center;font:600 12px Inter;color:{{ tPhotoC }};background:{{ tPhotoB }};border:1px solid {{ tPhotoBr }};border-radius:11px;padding:11px 6px;cursor:pointer">🖼 Photo / Screenshot</div>
 <div onClick="{{ pickLink }}" style="flex:1;text-align:center;font:600 12px Inter;color:{{ tLinkC }};background:{{ tLinkB }};border:1px solid {{ tLinkBr }};border-radius:11px;padding:11px 6px;cursor:pointer">🔗 Link</div>
-<div onClick="{{ pickPhoto }}" style="flex:1;text-align:center;font:600 12px Inter;color:{{ tPhotoC }};background:{{ tPhotoB }};border:1px solid {{ tPhotoBr }};border-radius:11px;padding:11px 6px;cursor:pointer">🖼 Photo</div>
-<div onClick="{{ pickVideo }}" style="flex:1;text-align:center;font:600 12px Inter;color:{{ tVideoC }};background:{{ tVideoB }};border:1px solid {{ tVideoBr }};border-radius:11px;padding:11px 6px;cursor:pointer">🎬 Video</div>
 </div>
-<div style="margin-top:11px;display:flex;gap:9px;align-items:flex-start;background:#12151b;border:1px dashed #262c34;border-radius:12px;padding:11px 12px"><span style="font:12px JetBrains Mono;color:oklch(0.72 0.15 145);flex:none">›</span><div style="font:11px/1.55 Inter;color:#9aa3b0">{{ pickHint }}</div></div>
+<div style="margin-top:11px;display:flex;gap:9px;align-items:flex-start;background:oklch(0.72 0.15 145 / .1);border:1px solid oklch(0.72 0.15 145 / .3);border-radius:12px;padding:11px 12px"><span style="font:14px;flex:none">📱</span><div style="font:11.5px/1.55 Inter;color:#c4ccd6"><b style="color:#eef1f6">Checking an Instagram, WhatsApp or video post?</b> Take a screenshot and upload it with <b>Photo / Screenshot</b> — that works best.</div></div>
+<sc-if value="{{ pickHint }}" hint-placeholder-val="{{ false }}"><div style="margin-top:9px;font:11px/1.55 Inter;color:#8a93a0;padding:0 2px">{{ pickHint }}</div></sc-if>
 <input type="file" accept="image/*" ref="{{ photoRef }}" onChange="{{ onPhoto }}" style="display:none"/>
 <input type="file" accept="video/*" ref="{{ videoRef }}" onChange="{{ onVideo }}" style="display:none"/>
 <sc-if value="{{ isLink }}" hint-placeholder-val="{{ false }}">
@@ -377,9 +378,8 @@ input:focus,textarea:focus{outline:none;border-color:oklch(0.72 0.15 145)!import
 <div onClick="{{ clearFile }}" style="font:14px Inter;color:#7a828f;cursor:pointer">✕</div>
 </div>
 </sc-if>
-<div style="margin-top:16px;font:11px/1.5 Inter;color:#7a828f">DisMyth cross-checks against trusted sources and the live web with AI, then traces where a claim is spreading.</div>
-<div onClick="{{ runCheck }}" style="margin-top:20px;text-align:center;font:700 14px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:13px;padding:14px;cursor:pointer">Verify now →</div>
-<div style="margin-top:12px;text-align:center;font:11px JetBrains Mono;color:#5a626f">Takes about 10 seconds — we consult 4 AIs live &amp; search the web</div>
+<div onClick="{{ runCheck }}" style="margin-top:20px;text-align:center;font:700 15px Inter;color:#04140b;background:oklch(0.72 0.15 145);border-radius:13px;padding:15px;cursor:pointer">Check it →</div>
+<div style="margin-top:12px;text-align:center;font:11px JetBrains Mono;color:#5a626f">About 15 seconds · 4 AIs check it live against the web</div>
 </div>
 </div>
 </sc-if>
@@ -1095,7 +1095,7 @@ class Component extends DCLogic {
       onPhoto: e => this.onPhoto(e), onVideo: e => this.onVideo(e), clearFile: () => this.clearFile(),
       onLink: e => this.setState({ linkUrl: e.target.value }), linkUrl: S.linkUrl,
       photoRef: this.photoRef, videoRef: this.videoRef,
-      pickHint: { text: 'Paste or type the exact claim you want checked — a sentence, a rumour, or a forwarded message.', link: '🔗 Paste the URL of the post, tweet or article. We open it, read the claim inside, and trace where it spread.', photo: '🖼 Upload a screenshot or image. We run reverse-image forensics to spot edits, AI-generation and old photos reused as new.', video: '🎬 Upload the clip. We check it frame-by-frame for manipulation and whether old footage is being passed off as current.' }[S.attachType] || '',
+      pickHint: { text: '', link: '🔗 Paste a news article or public post URL — we open it and check what it actually says. (Private Instagram/Facebook posts can’t be opened — screenshot them instead.)', photo: '🖼 Your photo or screenshot is read by AI — it checks the text and the image itself against the web.', video: '' }[S.attachType] || '',
       isLink: S.attachType === 'link', hasFile: !!S.fileName, fileName: S.fileName,
       fileThumb: (S.fileIsImage && S.fileUrl) ? ('url(' + S.fileUrl + ')') : 'none',
       fileIcon: S.fileIsImage ? '' : (S.attachType === 'video' ? '\ud83c\udfac' : '\ud83d\uddbc'),
