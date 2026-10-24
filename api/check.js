@@ -89,7 +89,7 @@ async function callClaude(content, key, model) {
   let data;
   // Stay well under the 60s platform cap: give the whole Claude+search phase a
   // hard budget and abort rather than let it run into a 504.
-  const deadline = Date.now() + 42000;
+  const deadline = Date.now() + 48000;
   for (let i = 0; i < 3; i++) {
     const remaining = deadline - Date.now();
     if (remaining < 3000) return { ok: false, status: 408, detail: 'Claude search phase exceeded its time budget.' };
@@ -389,6 +389,24 @@ module.exports = async function handler(req, res) {
   const [claude, [gpt, grok, gem]] = await Promise.all([claudeP, votersP]);
 
   if (!claude.ok) {
+    // Primary model was slow/errored — don't return nothing. If the other
+    // web-grounded AIs answered, build the verdict from them instead.
+    const vm = [];
+    [['GPT-4o', gpt], ['Grok', grok], ['Gemini', gem]].forEach(([n, r]) => {
+      if (r && !r.status && r.verdict != null) vm.push({ name: n, live: true, verdict: r.verdict, confidence: r.confidence });
+    });
+    if (vm.length) {
+      const counts = {}; vm.forEach((m) => { counts[m.verdict] = (counts[m.verdict] || 0) + 1; });
+      let best = vm[0].verdict, bn = 0; Object.keys(counts).forEach((k) => { if (counts[k] > bn) { bn = counts[k]; best = k; } });
+      const avg = Math.round(vm.reduce((s, m) => s + (typeof m.confidence === 'number' ? m.confidence : 60), 0) / vm.length);
+      const v = {
+        verdict: best, confidence: avg, claim: claim || 'Submitted item',
+        checks: ['Cross-checked by ' + vm.length + ' AI models against live web sources.'],
+        origin: 'Multi-AI consensus', evidence: [], consensus: { models: vm },
+      };
+      await saveCheck(v, claim, (body.region || '').toString().slice(0, 120));
+      return json(200, v);
+    }
     return json(200, {
       verdict: 'Unverified',
       confidence: 40,
