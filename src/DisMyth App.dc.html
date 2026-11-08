@@ -1188,7 +1188,7 @@ class Component extends DCLogic {
       shareApp: () => this.shareApp(), inviteLabel: S.inviteCopied ? 'Link copied — paste it to your friends ✓' : 'Help stop fake news — share the app',
       isSignedIn: !!(window.dm && window.dm.session), notSignedIn: !(window.dm && window.dm.session), userEmail: (window.dm && window.dm.email) || '',
       authStatus: S.authBusy ? 'Signing you in…' : (S.authMsg || ''),
-      googleAuth: () => this.setState({ authMsg: 'Google sign-in is coming soon — use your email and a password above.' }),
+      googleAuth: () => { if (window.dm && window.dm.oauth) { this.setState({ authMsg: 'Opening Google…' }); window.dm.oauth('google'); } },
       appleAuth: () => this.setState({ authMsg: 'Apple sign-in is coming soon — use your email and a password above.' }),
       signOutUser: () => this.signOutUser(),
       geoLabel: S.geoStatus === 'locating' ? '· locating…' : S.geoStatus === 'denied' ? '· location blocked' : S.geoStatus === 'error' ? '· tap to retry' : (S.geoStatus === 'done' || S.reg.region) ? '' : '· tap to detect',
