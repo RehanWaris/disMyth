@@ -31,6 +31,8 @@ SRC_TO_OUT = {
     "DisMyth App.dc.html":           "app.html",
     "DisMyth Methodology.dc.html":   "methodology.html",
     "DisMyth Backend Brief.dc.html": "brief.html",
+    "privacy.html":                  "privacy.html",
+    "terms.html":                    "terms.html",
 }
 
 # per-page <head> metadata
@@ -120,6 +122,7 @@ AUTH_SCRIPT = '''<script>
   dm.oauth=function(p){ location.href=SB+'/auth/v1/authorize?provider='+p+'&redirect_to='+encodeURIComponent(location.origin+'/app.html'); };
   dm.signOut=function(){ dm.session=null; dm.email=''; try{ localStorage.removeItem(LS); }catch(e){} };
   dm.saveProfile=function(f){ if(!dm.session) return Promise.resolve(false); return fetch(SB+'/rest/v1/profiles?id=eq.'+dm.session.user_id,{method:'PATCH',headers:{'content-type':'application/json',apikey:KEY,authorization:'Bearer '+dm.session.access_token,prefer:'return=minimal'},body:JSON.stringify(f)}).then(function(r){return r.ok;}).catch(function(){return false;}); };
+  dm.myChecks=function(){ if(!dm.session) return Promise.resolve([]); return fetch(SB+'/rest/v1/rpc/my_checks',{method:'POST',headers:{'content-type':'application/json',apikey:KEY,authorization:'Bearer '+dm.session.access_token},body:JSON.stringify({lim:50})}).then(function(r){return r.ok?r.json():[];}).then(function(d){return Array.isArray(d)?d:[];}).catch(function(){return [];}); };
 })();
 </script>'''
 
@@ -144,6 +147,14 @@ META = {
         title="DisMyth — Backend Build Brief",
         desc="Engineering handoff: the backend specification that turns the DisMyth prototype into a live product.",
         path="/brief.html", noindex=True),   # confidential handoff — keep out of search
+    "privacy.html": dict(
+        title="DisMyth — Privacy Policy",
+        desc="What DisMyth collects, why, and the choices you have. We keep it short and plain.",
+        path="/privacy.html", noindex=False),
+    "terms.html": dict(
+        title="DisMyth — Terms of Use",
+        desc="The terms for using DisMyth's AI fact-checking service, including the important note that verdicts are AI-generated information, not professional advice.",
+        path="/terms.html", noindex=False),
 }
 
 VIEWPORT = '<meta name="viewport" content="width=device-width, initial-scale=1">'
@@ -269,7 +280,8 @@ document.addEventListener('submit', function (e) {
 def reshell_app(html):
     """Turn the phone-mockup app into a full-screen, responsive web app.
     Mobile: edge-to-edge, full height. Desktop: centered mobile-width column.
-    Also opens straight to the feed (no forced sign-up)."""
+    Initial screen is decided in the app itself: signed-in people open on the
+    feed, first-timers hit the account step (sign-up wall)."""
     reps = [
         # outer black phone body -> responsive app column
         ('<div style="width:340px;height:720px;border-radius:46px;padding:11px;background:#000;box-shadow:0 40px 80px -24px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);position:relative;flex:none">',
@@ -284,8 +296,6 @@ def reshell_app(html):
         # body: fill the viewport instead of centering a fixed card
         ('body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}',
          'body{margin:0;background:#16181d;font-family:Inter,system-ui,sans-serif;min-height:100dvh}'),
-        # open straight to the feed — free users never hit a sign-up wall
-        ("screen: 'onboarding', step: 0,", "screen: 'feed', step: 0,"),
     ]
     for old, new in reps:
         assert old in html, "reshell anchor not found: " + old[:55]
@@ -374,7 +384,7 @@ def build():
     # sitemap (public pages only)
     urls = "".join(
         f"  <url><loc>{DOMAIN}{META[p]['path']}</loc></url>\n"
-        for p in ("index.html", "app.html", "methodology.html"))
+        for p in ("index.html", "app.html", "methodology.html", "privacy.html", "terms.html"))
     open(os.path.join(DIST, "sitemap.xml"), "w", encoding="utf-8").write(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'

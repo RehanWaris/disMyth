@@ -305,27 +305,30 @@ async function abuseBlock(ip, uid) {
 
 // Save each check to the Supabase "checks" table (server-side, service role).
 // Best-effort: a logging failure must never break the user's verdict.
-async function saveCheck(verdict, claim, region) {
+async function saveCheck(verdict, claim, region, uid) {
   const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return;
+  const endpoint = url.replace(/\/+$/, '') + '/rest/v1/checks';
+  const headers = { 'content-type': 'application/json', apikey: key, authorization: 'Bearer ' + key, prefer: 'return=minimal' };
+  const row = {
+    claim: (claim || verdict.claim || '').slice(0, 2000),
+    verdict: verdict.verdict || null,
+    confidence: typeof verdict.confidence === 'number' ? verdict.confidence : null,
+    models: (verdict.consensus && verdict.consensus.models) || null,
+    evidence: verdict.evidence || null,
+    region: region || null,
+    user_id: (uid && /^[0-9a-f-]{36}$/i.test(uid)) ? uid : null,
+  };
+  const post = (body) => fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
   try {
-    await fetch(url.replace(/\/+$/, '') + '/rest/v1/checks', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        apikey: key,
-        authorization: 'Bearer ' + key,
-        prefer: 'return=minimal',
-      },
-      body: JSON.stringify({
-        claim: (claim || verdict.claim || '').slice(0, 2000),
-        verdict: verdict.verdict || null,
-        confidence: typeof verdict.confidence === 'number' ? verdict.confidence : null,
-        models: (verdict.consensus && verdict.consensus.models) || null,
-        evidence: verdict.evidence || null,
-        region: region || null,
-      }),
-    });
+    const r = await post(row);
+    // If the user_id column isn't there yet (SQL not run), PostgREST rejects the
+    // whole row. Retry once without user_id so logging never silently breaks —
+    // this makes the deploy safe to ship before or after the history SQL.
+    if (!r.ok && row.user_id) {
+      const rest = Object.assign({}, row); delete rest.user_id;
+      await post(rest);
+    }
   } catch (e) {
     /* ledger logging is best-effort; never surface to the user */
   }
@@ -393,7 +396,7 @@ module.exports = async function handler(req, res) {
     }
     const vv = cv.obj;
     vv.consensus = { models: [{ name: 'Claude Vision', live: true, verdict: vv.verdict, confidence: vv.confidence }] };
-    await saveCheck(vv, claim || vv.claim, (body.region || '').toString().slice(0, 120));
+    await saveCheck(vv, claim || vv.claim, (body.region || '').toString().slice(0, 120), uid);
     return json(200, vv);
   }
 
@@ -431,7 +434,7 @@ module.exports = async function handler(req, res) {
         checks: ['Cross-checked by ' + vm.length + ' AI models against live web sources.'],
         origin: 'Multi-AI consensus', evidence: [], consensus: { models: vm },
       };
-      await saveCheck(v, claim, (body.region || '').toString().slice(0, 120));
+      await saveCheck(v, claim, (body.region || '').toString().slice(0, 120), uid);
       return json(200, v);
     }
     return json(200, {
@@ -456,6 +459,6 @@ module.exports = async function handler(req, res) {
   add('Gemini', gem);
 
   verdict.consensus = { models };
-  await saveCheck(verdict, claim, (body.region || '').toString().slice(0, 120));
+  await saveCheck(verdict, claim, (body.region || '').toString().slice(0, 120), uid);
   return json(200, verdict);
 };
