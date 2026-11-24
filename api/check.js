@@ -266,8 +266,8 @@ async function readAiEnabled() {
 // Each check calls 4 paid AIs + web search, so an open endpoint can drain the
 // wallet. Two caps, both best-effort (fail OPEN so a DB hiccup never blocks
 // real users): per-IP per hour, and a global per-day safety net.
-const PER_KEY_DAY = 5;      // max checks per visitor (login if signed-in, else IP) per 24h
-const GLOBAL_DAY = 100;     // max successful checks per day (wallet safety net)
+const PER_KEY_DAY = 2;      // free beta: max checks per visitor (login if signed-in, else IP) per 24h
+const GLOBAL_DAY = 60;      // free beta: max successful checks per day worldwide (wallet safety net)
 
 function restBase() { const u = process.env.SUPABASE_URL; return u ? u.replace(/\/+$/, '') : ''; }
 function svcHeaders() { const k = process.env.SUPABASE_SERVICE_ROLE_KEY; return { apikey: k, authorization: 'Bearer ' + k }; }
@@ -277,14 +277,14 @@ async function countSince(path) {
   return parseInt((cr.split('/')[1] || '0'), 10) || 0;
 }
 // Returns a reason string if the request should be refused, else ''.
-// Limits: global 100/day; per identity 5/24h — keyed by login (uid) when signed
+// Limits: global 60/day; per identity 2/24h — keyed by login (uid) when signed
 // in, AND by IP (the IP cap is the backstop that stops uid-spoofing and multi-
 // account abuse). Best-effort: fails OPEN so a DB hiccup never blocks real users.
 async function abuseBlock(ip, uid) {
   const base = restBase(), key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!base || !key) return '';
   const dayAgo = new Date(Date.now() - 86400e3).toISOString();
-  const quota = 'You’ve used your 5 free checks for the day. Please come back tomorrow.';
+  const quota = 'You’ve used your 2 free checks for today. Please come back tomorrow — higher limits are coming soon with DisMyth+.';
   try {
     if (await countSince('/rest/v1/checks?select=id&created_at=gte.' + dayAgo) >= GLOBAL_DAY) {
       return 'DisMyth is at today’s free capacity. Please try again tomorrow.';
